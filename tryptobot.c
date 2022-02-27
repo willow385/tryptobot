@@ -202,10 +202,12 @@ char *handle_message(const char *msg) {
   free(msg_copy);
 
   // process command
+  char *result;
   if (!strcmp(margv[0], "%commands")) {
     command_t_vec *commands_vec = load_commands();
     if (commands_vec == NULL) {
-      return strdup("Backend error");
+      result = strdup("Backend error");
+      goto cleanup;
     }
     size_t result_len;
     char *result_start = "List of commands supported by tryptobot:\n";
@@ -220,7 +222,7 @@ char *handle_message(const char *msg) {
     char *result_end = "For more info about a specific command, "
                        "try `%cmdinfo <command>`.\n";
     result_len += strlen(result_end);
-    char *result = malloc(result_len + 1);
+    result = malloc(result_len + 1);
     strcpy(result, result_start);
     for (int i = 0; i < commands_vec->size; i++) {
       sprintf(
@@ -234,13 +236,13 @@ char *handle_message(const char *msg) {
       free_command_t_members(commands_vec->commands + i);
     free(commands_vec->commands);
     free(commands_vec);
-    return result;
   } else if (!strcmp(margv[0], "%cmdinfo")) {
     if (margc < 2) {
-      return strdup(
+      result = strdup(
         "Error: no command specified. "
         "Syntax is `%cmdinfo <command>`."
       );
+      goto cleanup;
     }
     char *queried_command = margv[1];
     command_t_vec *commands_vec = load_commands();
@@ -250,7 +252,6 @@ char *handle_message(const char *msg) {
         result_command = commands_vec->commands + i;
       }
     }
-    char *result;
     if (result_command == NULL) {
       char *err_msg_start = "Unable to find info for command `";
       char *err_msg_end = "`. Did you forget to include a leading '%'?";
@@ -286,34 +287,31 @@ char *handle_message(const char *msg) {
       free_command_t_members(commands_vec->commands + i);
     free(commands_vec->commands);
     free(commands_vec);
-    return result;
   } else if (!strcmp(margv[0], "%reverse")) {
     if (margc == 2 && !strcmp(margv[1], "Ipswich")) {
-      return strdup("Bolton");
+      result = strdup("Bolton");
     } else if (margc == 2 && !strcmp(margv[1], "ipswich")) {
-      return strdup("bolton");
+      result = strdup("bolton");
     } else {
       char *msg_ptr = (char *) msg + 9; // 9 == strlen("%reverse ")
       while (*msg_ptr == ' ') msg_ptr++;
-      char *result = utf8_reverse(msg_ptr, strlen(msg_ptr) + 1);
+      result = utf8_reverse(msg_ptr, strlen(msg_ptr) + 1);
       if (result == NULL) {
-        return strdup("Memory allocation error");
+        result = strdup("Memory allocation error");
       }
-      return result;
     }
   } else {
-    char *result;
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
     size_t size = strlen(err_msg) + strlen(margv[0]) + strlen(err_msg_end) + 1;
     result = malloc(size);
     snprintf(result, size, "%s%s%s", err_msg, margv[0], err_msg_end);
-    return result;
   }
 
-  // cleanup
+cleanup:
   for (int i = 0; i < margc-1; i++) {
     free(margv[i]);
   }
   free(margv);
+  return result;
 }
