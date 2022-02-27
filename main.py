@@ -21,9 +21,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-  async def send(new_message):
-    await message.channel.send(new_message)
-
   if message.author != client.user and message.author.name != "Carl-bot":
     if message.channel.id == 939263185712721950:
       lang = cld2.detect(message.content)[2][0][0]
@@ -33,7 +30,6 @@ async def on_message(message):
           "Il est interdit d'envoyer des messages "
           "en anglais sur le canal #langues-étrangères."
         )
-
     if len(message.content) > 0 and message.content[0] == '%':
       if message.content[1:6] == "bonk ":
         horny_user = message.content[6:]
@@ -41,12 +37,13 @@ async def on_message(message):
           f"{horny_user} go to horny jail",
           file=discord.File("cheems.png")
         )
-
       else:
         result = libtrypto.handle_message(
           ctypes.c_char_p(bytes(message.content, encoding="utf-8"))
         )
-        await send(ctypes.cast(result, ctypes.c_char_p).value.decode())
+        await message.channel.send(
+          ctypes.cast(result, ctypes.c_char_p).value.decode()
+        )
         libc.free(result)
 
 keep_alive()
