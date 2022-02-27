@@ -47,7 +47,7 @@ async def on_message(message):
           "Il est interdit d'envoyer des messages "
           "en anglais sur le canal #langues-étrangères."
         )
-    else
+    else:
       try:
         global mysterious_reminder_count
         reminders = json.loads(
