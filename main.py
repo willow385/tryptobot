@@ -18,11 +18,6 @@ libtrypto = ctypes.CDLL("./libtryptobot.so")
 libtrypto.handle_message.argtypes = (ctypes.c_char_p,)
 libtrypto.handle_message.restype = ctypes.POINTER(ctypes.c_char)
 
-def load_commands():
-  commands_list = json.loads(open("commands.json").read())["commands"]
-  commands_list.sort(key=lambda x: x["command"])
-  return commands_list
-
 
 @client.event
 async def on_ready():
@@ -72,28 +67,6 @@ async def on_message(message):
         )
 
       # TODO reimplement in C
-      elif message.content[1:6] == "roll ":
-        dice = []
-        global previous_roll
-        dice_string = message.content[6:]
-        dice_count = None
-        dice_faces = None
-        try:
-          dice_info = dice_string.lower().split('d')
-          dice_count = int(dice_info[0])
-          dice_faces = int(dice_info[1])
-          if dice_count < 50000 and dice_faces < 50000:
-            for i in range(dice_count):
-              dice.append(GamingDice(dice_faces))
-            result = sum([die.roll() for die in dice])
-            previous_roll = dice_string
-            await send(f"Result of rolling {dice_count}d{dice_faces}: {result}")
-          else:
-            await send("Error: too many rolls or faces.")
-        except:
-          await send(f"Syntax error: `\"{dice_string}\"` is not valid dice notation.")
-
-      # TODO reimplement in C
       elif message.content[1:7] == "reroll":
         dice_info = previous_roll.lower().split('d')
         dice_count = int(dice_info[0])
@@ -101,14 +74,6 @@ async def on_message(message):
         dice = [GamingDice(dice_faces) for i in range(dice_count)]
         result = sum([die.roll() for die in dice])
         await send(f"Result of rolling {dice_count}d{dice_faces}: {result}")
-
-      elif message.content[1:5] == "add ":
-        args = message.content.split(" ")
-        a = int(args[1])
-        b = int(args[2]) 
-        await send(
-          f"Result from calling C function `c_add_nums()`: {libtrypto.c_add_nums(a, b)}"
-        )
 
       else:
         result = libtrypto.handle_message(

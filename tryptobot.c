@@ -1,12 +1,10 @@
 #include <stdlib.h>
+#include <ctype.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 #include "jsmn.h"
-
-int c_add_nums(int a, int b) {
-  return a + b;
-}
 
 // copied from here https://stackoverflow.com/a/19674312
 unsigned char *utf8_reverse(const unsigned char *str, int size) {
@@ -50,10 +48,10 @@ typedef struct command_t {
   char *description;
 } command_t;
 
-typedef struct command_t_vec {
+typedef struct command_vec_t {
   size_t size;
   command_t *commands;
-} command_t_vec;
+} command_vec_t;
 
 // frees the MEMBERS of *command, NOT command itself
 void free_command_t_members(command_t *command) {
@@ -116,26 +114,33 @@ jsmntok_t *json_tokenize(char *json_string, int *token_ct) {
   return tokens;
 }
 
-command_t_vec *load_commands(void) {
-  FILE *f = fopen("commands.json", "rb");
-  char *json_string;
+char *load_file_to_str(const char *filename) {
+  FILE *f = fopen(filename, "rb");
+  char *result;
   if (f) {
     fseek(f, 0, SEEK_END);
     long length = ftell(f);
     int x;
     fseek(f, 0, SEEK_SET);
-    json_string = malloc(length+1);
-    if (json_string) {
-      x = fread(json_string, 1, length, f);
-      json_string[x] = '\0';
+    result = malloc(length+1);
+    if (result) {
+      x = fread(result, 1, length, f);
+      result[x] = '\0';
     } else {
       fprintf(stderr, "Memory allocation error\n");
+      fclose(f);
       return NULL;
     }
   } else {
-    fprintf(stderr, "Unable to find `commands.json`\n");
+    fprintf(stderr, "Unable to find `%s`\n", filename);
     return NULL;
   }
+  fclose(f);
+  return result;
+}
+
+command_vec_t *load_commands(void) {
+  char *json_string = load_file_to_str("commands.json");
 
   int token_ct;
   jsmntok_t *tokens = json_tokenize(json_string, &token_ct);
@@ -151,7 +156,7 @@ command_t_vec *load_commands(void) {
   }
 
   // get the data from the JSON and return it
-  command_t_vec *result = malloc(sizeof(command_t_vec));
+  command_vec_t *result = malloc(sizeof(command_vec_t));
   result->size = command_ct;
   result->commands = malloc(result->size * sizeof(command_t));
   for (int i = 0; i < command_ct; i++) {
@@ -173,6 +178,56 @@ command_t_vec *load_commands(void) {
   }
   free(tokens);
   free(json_string);
+  return result;
+}
+
+typedef struct diceroll_t {
+  int dice_ct, faces, value;
+} diceroll_t;
+
+diceroll_t load_last_diceroll(void) {
+  char *last_diceroll_str = load_file_to_str("lastroll.txt");
+  if (last_diceroll_str) {
+    diceroll_t result;
+    sscanf(
+      last_diceroll_str,
+      "dice:%dd%d;val:%d;",
+      &result.dice_ct, &result.faces, &result.value
+    );
+    return result;
+  } else {
+    fprintf(stderr, "Unable to read last dice roll\n");
+    return (diceroll_t){-1, -1, -1};
+  }
+}
+
+void save_diceroll(diceroll_t diceroll) {
+  FILE *f = fopen("lastroll.txt", "w+");
+  if (f) {
+    fprintf(
+      f, "dice:%dd%d;val:%d;",
+      diceroll.dice_ct, diceroll.faces, diceroll.value
+    );
+    fclose(f);
+  } else {
+    fprintf(stderr, "Unable to write to `lastroll.txt`\n");
+  }
+}
+
+int random_int(int min, int max){
+  return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
+diceroll_t roll_dice(int dice_ct, int faces) {
+  srand(time(NULL));
+  diceroll_t result;
+  result.dice_ct = dice_ct;
+  result.faces = faces;
+  int value = 0;
+  for (int i = 0; i < dice_ct; i++) {
+    value += random_int(1, faces);
+  }
+  result.value = value;
   return result;
 }
 
@@ -204,7 +259,7 @@ char *handle_message(const char *msg) {
   // process command
   char *result;
   if (!strcmp(margv[0], "%commands")) {
-    command_t_vec *commands_vec = load_commands();
+    command_vec_t *commands_vec = load_commands();
     if (commands_vec == NULL) {
       result = strdup("Backend error");
       goto cleanup;
@@ -245,7 +300,7 @@ char *handle_message(const char *msg) {
       goto cleanup;
     }
     char *queried_command = margv[1];
-    command_t_vec *commands_vec = load_commands();
+    command_vec_t *commands_vec = load_commands();
     command_t *result_command = NULL; // non-owning pointer
     for (int i = 0; i < commands_vec->size; i++) {
       if (!strcmp(commands_vec->commands[i].command, queried_command)) {
@@ -300,6 +355,66 @@ char *handle_message(const char *msg) {
         result = strdup("Memory allocation error");
       }
     }
+  } else if (!strcmp(margv[0], "%roll")) {
+    if (margc < 2) {
+      result = strdup("Error: Roll what?");
+      goto cleanup;
+    }
+
+    // check if the dice string is valid
+    int d_ct = 0; // number of instances of 'd' or 'D'
+    int is_valid = 1;
+    for (int i = 0; margv[1][i]; i++) {
+      if (margv[1][i] == 'd') {
+        d_ct++;
+      } else if (margv[1][i] == 'D') {
+        margv[1][i] = 'd';
+        d_ct++;
+      } else if (!isdigit(margv[1][i])) {
+        is_valid = 0;
+      }
+    }
+    if (d_ct != 1) is_valid = 0;
+    if (!is_valid) {
+      char *err_msg = "Syntax error: `\"";
+      char *err_msg_end = "\"` is not valid dice notation.";
+      int result_len = snprintf(
+        NULL, 0, "%s%s%s",
+        err_msg, margv[1], err_msg_end
+      );
+      result = malloc(result_len+1);
+      sprintf(result, "%s%s%s", err_msg, margv[1], err_msg_end);
+      goto cleanup;
+    }
+
+    // dice string has been validated, now we roll the dice
+    int dice_ct, faces;
+    sscanf(margv[1], "%dd%d", &dice_ct, &faces);
+    if (faces < 1) {
+      char *err_msg_start = "Error: Dice with ";
+      char *err_msg_end = " faces are not allowed.";
+      int result_len = snprintf(
+        NULL, 0,
+        "%s%d%s",
+        err_msg_start, faces, err_msg_end
+      );
+      result = malloc(result_len+1);
+      sprintf(result, "%s%d%s", err_msg_start, faces, err_msg_end);
+      goto cleanup;
+    }
+    diceroll_t dice_roll = roll_dice(dice_ct, faces);
+    int result_len = snprintf(
+      NULL, 0,
+      "Result of rolling %dd%d: %d",
+      dice_roll.dice_ct, dice_roll.faces, dice_roll.value
+    );
+    result = malloc(result_len+1);
+    sprintf(
+      result,
+      "Result of rolling %dd%d: %d",
+      dice_roll.dice_ct, dice_roll.faces, dice_roll.value
+    );
+    save_diceroll(dice_roll);
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
