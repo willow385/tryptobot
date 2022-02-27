@@ -1,0 +1,39 @@
+{
+  "commands": [
+    {
+      "command": "%reverse",
+      "syntax": "%reverse <text>",
+      "description": "Returns <text> flipped backwards."
+    },
+    {
+      "command": "%commands",
+      "syntax": "%commands",
+      "description": "Returns a list of all commands supported by tryptobot."
+    },
+    {
+      "command": "%cmdinfo",
+      "syntax": "%cmdinfo <command>",
+      "description": "Returns a detailed description of <command>, if <command> is a command supported by tryptobot. Don't forget to include the leading percentage sign."
+    },
+    {
+      "command": "%bonk",
+      "syntax": "%bonk <user>",
+      "description": "Sends <user> to horny jail."
+    },
+    {
+      "command": "%roll",
+      "syntax": "%roll <count>d<n>",
+      "description": "Returns the result of rolling <count> virtual dice with <n> faces. <count> and <n> must be integers less than 50,000. Negative values of <n> are a syntax error. Results are guaranteed to be fair, as they are cryptographically random. See also `%reroll`."
+    },
+    {
+      "command": "%reroll",
+      "syntax": "%reroll",
+      "description": "Rerolls the last valid dice roll. For example, if the last person to roll the dice rolled 2d20, this command will roll 2d20 and return the result. This command may be repeated an indefinite number of times. Invalid dice rolls will be ignored."
+    },
+    {
+      "command": "%add",
+      "syntax": "%add <x> <y>",
+      "description": "Tests the C function c_add_nums, which takes two integers and returns their sum."
+    }
+  ]
+}

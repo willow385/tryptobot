@@ -1,0 +1,5 @@
+*.so
+__pycache__/
+poetry.lock
+venv/
+mysterious_reminders.json
