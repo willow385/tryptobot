@@ -7,39 +7,39 @@
 #include "jsmn.h"
 
 // copied from here https://stackoverflow.com/a/19674312
-unsigned char *utf8_reverse(const unsigned char *str, int size) {
-    unsigned char *ret = calloc(size, sizeof(unsigned char*));
-    int ret_size = 0;
-    int pos = size - 2;
-    int char_size = 0;
+static unsigned char *utf8_reverse(const unsigned char *str, int size) {
+  unsigned char *ret = calloc(size, sizeof(unsigned char*));
+  int ret_size = 0;
+  int pos = size - 2;
+  int char_size = 0;
 
-    if (str == NULL) {
-        fprintf(stderr, "failed to allocate memory.\n");
-        return NULL;
+  if (str == NULL) {
+    fprintf(stderr, "failed to allocate memory.\n");
+    return NULL;
+  }
+
+  while (pos > -1) {
+
+    if (str[pos] < 0x80) {
+      char_size = 1;
+    } else if (pos > 0 && str[pos - 1] > 0xC1 && str[pos - 1] < 0xE0) {
+      char_size = 2;
+    } else if (pos > 1 && str[pos - 2] > 0xDF && str[pos - 2] < 0xF0) {
+      char_size = 3;
+    } else if (pos > 2 && str[pos - 3] > 0xEF && str[pos - 3] < 0xF5) {
+      char_size = 4;
+    } else {
+      char_size = 1;
     }
 
-    while (pos > -1) {
+    pos -= char_size;
+    memcpy(ret + ret_size, str + pos + 1, char_size);
+    ret_size += char_size;
+  }    
 
-        if (str[pos] < 0x80) {
-            char_size = 1;
-        } else if (pos > 0 && str[pos - 1] > 0xC1 && str[pos - 1] < 0xE0) {
-            char_size = 2;
-        } else if (pos > 1 && str[pos - 2] > 0xDF && str[pos - 2] < 0xF0) {
-            char_size = 3;
-        } else if (pos > 2 && str[pos - 3] > 0xEF && str[pos - 3] < 0xF5) {
-            char_size = 4;
-        } else {
-            char_size = 1;
-        }
+  ret[ret_size] = '\0';
 
-        pos -= char_size;
-        memcpy(ret + ret_size, str + pos + 1, char_size);
-        ret_size += char_size;
-    }    
-
-    ret[ret_size] = '\0';
-
-    return ret;
+  return ret;
 }
 
 typedef struct command_t {
@@ -54,14 +54,14 @@ typedef struct command_vec_t {
 } command_vec_t;
 
 // frees the MEMBERS of *command, NOT command itself
-void free_command_t_members(command_t *command) {
+static void free_command_t_members(command_t *command) {
   free(command->command);
   free(command->syntax);
   free(command->description);
 }
 
 // transfers ownership of passed pointers to *dest
-void create_command(
+static void create_command(
   command_t *dest,
   char *command,
   char *syntax,
@@ -73,7 +73,7 @@ void create_command(
 }
 
 // number of tokens is stored in *token_ct
-jsmntok_t *json_tokenize(char *json_string, int *token_ct) {
+static jsmntok_t *json_tokenize(char *json_string, int *token_ct) {
   jsmn_parser p;
   jsmn_init(&p);
   int json_len = strlen(json_string);
@@ -114,7 +114,7 @@ jsmntok_t *json_tokenize(char *json_string, int *token_ct) {
   return tokens;
 }
 
-char *load_file_to_str(const char *filename) {
+static char *load_file_to_str(const char *filename) {
   FILE *f = fopen(filename, "rb");
   char *result;
   if (f) {
@@ -139,7 +139,7 @@ char *load_file_to_str(const char *filename) {
   return result;
 }
 
-command_vec_t *load_commands(void) {
+static command_vec_t *load_commands(void) {
   char *json_string = load_file_to_str("commands.json");
 
   int token_ct;
@@ -185,7 +185,7 @@ typedef struct diceroll_t {
   int dice_ct, faces, value;
 } diceroll_t;
 
-diceroll_t load_last_diceroll(void) {
+static diceroll_t load_last_diceroll(void) {
   char *last_diceroll_str = load_file_to_str("lastroll.txt");
   if (last_diceroll_str) {
     diceroll_t result;
@@ -201,7 +201,7 @@ diceroll_t load_last_diceroll(void) {
   }
 }
 
-void save_diceroll(diceroll_t diceroll) {
+static void save_diceroll(diceroll_t diceroll) {
   FILE *f = fopen("lastroll.txt", "w+");
   if (f) {
     fprintf(
@@ -214,12 +214,11 @@ void save_diceroll(diceroll_t diceroll) {
   }
 }
 
-int random_int(int min, int max){
+static int random_int(int min, int max){
   return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
-diceroll_t roll_dice(int dice_ct, int faces) {
-  srand(time(NULL));
+static diceroll_t roll_dice(int dice_ct, int faces) {
   diceroll_t result;
   result.dice_ct = dice_ct;
   result.faces = faces;
@@ -310,7 +309,7 @@ char *handle_message(const char *msg) {
     if (result_command == NULL) {
       char *err_msg_start = "Unable to find info for command `";
       char *err_msg_end = "`. Did you forget to include a leading '%'?";
-      int result_len = snprintf(
+      size_t result_len = snprintf(
         NULL, 0,
         "%s%s%s",
         err_msg_start, queried_command, err_msg_end
@@ -324,7 +323,7 @@ char *handle_message(const char *msg) {
     } else {
       char *result_pt_0 = "Command syntax: `";
       char *result_pt_1 = "`\nCommand description: ";
-      int result_len = snprintf(
+      size_t result_len = snprintf(
         NULL, 0,
         "%s%s%s%s",
         result_pt_0, result_command->syntax,
@@ -374,11 +373,12 @@ char *handle_message(const char *msg) {
         is_valid = 0;
       }
     }
+    if (margv[1][0] == 'd') is_valid = 0;
     if (d_ct != 1) is_valid = 0;
     if (!is_valid) {
       char *err_msg = "Syntax error: `\"";
       char *err_msg_end = "\"` is not valid dice notation.";
-      int result_len = snprintf(
+      size_t result_len = snprintf(
         NULL, 0, "%s%s%s",
         err_msg, margv[1], err_msg_end
       );
@@ -389,21 +389,21 @@ char *handle_message(const char *msg) {
 
     // dice string has been validated, now we roll the dice
     int dice_ct, faces;
-    sscanf(margv[1], "%dd%d", &dice_ct, &faces);
-    if (faces < 1) {
-      char *err_msg_start = "Error: Dice with ";
-      char *err_msg_end = " faces are not allowed.";
-      int result_len = snprintf(
+    int vals_scanned  = sscanf(margv[1], "%dd%d", &dice_ct, &faces);
+    if (faces < 1 || vals_scanned != 2) {
+      char *err_msg_start = "Error: Invalid dice: ";
+      size_t result_len = snprintf(
         NULL, 0,
-        "%s%d%s",
-        err_msg_start, faces, err_msg_end
+        "%s%s",
+        err_msg_start, margv[1]
       );
       result = malloc(result_len+1);
-      sprintf(result, "%s%d%s", err_msg_start, faces, err_msg_end);
+      sprintf(result, "%s%s", err_msg_start, margv[1]);
       goto cleanup;
     }
+    srand(time(NULL));
     diceroll_t dice_roll = roll_dice(dice_ct, faces);
-    int result_len = snprintf(
+    size_t result_len = snprintf(
       NULL, 0,
       "Result of rolling %dd%d: %d",
       dice_roll.dice_ct, dice_roll.faces, dice_roll.value
@@ -415,6 +415,26 @@ char *handle_message(const char *msg) {
       dice_roll.dice_ct, dice_roll.faces, dice_roll.value
     );
     save_diceroll(dice_roll);
+  } else if (!strcmp(margv[0], "%reroll")) {
+    diceroll_t last_roll = load_last_diceroll();
+    if (last_roll.value == -1) {
+      result = strdup("Backend error");
+      goto cleanup;
+    }
+    srand(time(NULL));
+    diceroll_t new_roll = roll_dice(last_roll.dice_ct, last_roll.faces);
+    size_t result_len = snprintf(
+      NULL, 0,
+      "Result of rolling %dd%d: %d",
+      new_roll.dice_ct, new_roll.faces, new_roll.value
+    );
+    result = malloc(result_len+1);
+    sprintf(
+      result,
+      "Result of rolling %dd%d: %d",
+      new_roll.dice_ct, new_roll.faces, new_roll.value
+    );
+    save_diceroll(new_roll);
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
