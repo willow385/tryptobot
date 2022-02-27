@@ -222,11 +222,10 @@ static diceroll_t roll_dice(int dice_ct, int faces) {
   diceroll_t result;
   result.dice_ct = dice_ct;
   result.faces = faces;
-  int value = 0;
+  result.value = 0;
   for (int i = 0; i < dice_ct; i++) {
-    value += random_int(1, faces);
+    result.value += random_int(1, faces);
   }
-  result.value = value;
   return result;
 }
 
