@@ -4,8 +4,6 @@ import os
 import ctypes
 from keep_alive import keep_alive
 
-client = discord.Client()
-
 recompile = "gcc -fPIC -shared tryptobot.c -o libtryptobot.so"
 print(recompile)
 os.system(recompile)
@@ -15,16 +13,14 @@ libtrypto = ctypes.CDLL("./libtryptobot.so")
 libtrypto.handle_message.argtypes = (ctypes.c_char_p,)
 libtrypto.handle_message.restype = ctypes.POINTER(ctypes.c_char)
 
-
+client = discord.Client()
 @client.event
 async def on_ready():
   print("Tryptobot online")
   print(client.user)
 
-
 @client.event
 async def on_message(message):
-
   async def send(new_message):
     await message.channel.send(new_message)
 
@@ -52,7 +48,6 @@ async def on_message(message):
         )
         await send(ctypes.cast(result, ctypes.c_char_p).value.decode())
         libc.free(result)
-
 
 keep_alive()
 token = os.environ.get("DISCORD_BOT_SECRET")
