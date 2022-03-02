@@ -229,6 +229,223 @@ static diceroll_t roll_dice(int dice_ct, int faces) {
   return result;
 }
 
+static char *cmd_commands(int margc, char **margv, int *error) {
+  char *result;
+  *error = 0;
+  command_vec_t *commands_vec = load_commands();
+  if (commands_vec == NULL) {
+    result = strdup("Backend error");
+    *error = 1;
+    return result;
+  }
+  size_t result_len;
+  const char *result_start = "List of commands supported by tryptobot:\n";
+  result_len = strlen(result_start);
+  for (int i = 0; i < commands_vec->size; i++) {
+    result_len += snprintf(
+      NULL, 0,
+      "`%s`\n",
+      commands_vec->commands[i].command
+    );
+  }
+  const char *result_end = "For more info about a specific command, "
+                           "try `%cmdinfo <command>`.\n";
+  result_len += strlen(result_end);
+  result = malloc(result_len + 1);
+  strcpy(result, result_start);
+  for (int i = 0; i < commands_vec->size; i++) {
+    sprintf(
+      result + strlen(result),
+      "`%s`\n",
+      commands_vec->commands[i].command
+    );
+  }
+  strcat(result, result_end);
+  for (int i = 0; i < commands_vec->size; i++)
+    free_command_t_members(commands_vec->commands + i);
+  free(commands_vec->commands);
+  free(commands_vec);
+  return result;
+}
+
+static char *cmd_cmdinfo(int margc, char **margv, int *error) {
+  char *result;
+  *error = 0; 
+  if (margc < 2) {
+    result = strdup(
+      "Error: no command specified. "
+      "Syntax is `%cmdinfo <command>`."
+    );
+    *error = 1;
+    return result;
+  }
+  const char *queried_command = margv[1];
+  command_vec_t *commands_vec = load_commands();
+  command_t *result_command = NULL; // non-owning pointer
+  for (int i = 0; i < commands_vec->size; i++) {
+    if (!strcmp(commands_vec->commands[i].command, queried_command)) {
+      result_command = commands_vec->commands + i;
+    }
+  }
+  if (result_command == NULL) {
+    const char *err_msg_start = "Unable to find info for command `";
+    const char *err_msg_end = "`. Did you forget to include a leading '%'?";
+    size_t result_len = snprintf(
+      NULL, 0,
+      "%s%s%s",
+      err_msg_start, queried_command, err_msg_end
+    );
+    result = malloc(result_len + 1);
+    sprintf(
+      result,
+      "%s%s%s",
+      err_msg_start, queried_command, err_msg_end
+    );
+  } else {
+    const char *result_pt_0 = "Command syntax: `";
+    const char *result_pt_1 = "`\nCommand description: ";
+    size_t result_len = snprintf(
+      NULL, 0,
+      "%s%s%s%s",
+      result_pt_0, result_command->syntax,
+      result_pt_1, result_command->description
+    );
+    result = malloc(result_len + 1);
+    sprintf(
+      result,
+      "%s%s%s%s",
+      result_pt_0, result_command->syntax,
+      result_pt_1, result_command->description
+    );
+  }
+  for (int i = 0; i < commands_vec->size; i++)
+    free_command_t_members(commands_vec->commands + i);
+  free(commands_vec->commands);
+  free(commands_vec);
+  return result;
+}
+
+static char *cmd_reverse(
+  int margc,
+  char **margv,
+  const char *msg, // should be pointer passed to handle_message as msg
+  int *error
+) {
+  char *result;
+  *error = 0;
+  if (margc == 2 && !strcmp(margv[1], "Ipswich")) {
+    result = strdup("Bolton");
+  } else if (margc == 2 && !strcmp(margv[1], "ipswich")) {
+    result = strdup("bolton");
+  } else {
+    char *msg_ptr = (char *) msg + 9; // 9 == strlen("%reverse ")
+    while (*msg_ptr == ' ') msg_ptr++;
+    result = utf8_reverse(msg_ptr, strlen(msg_ptr) + 1);
+    if (result == NULL) {
+      result = strdup("Memory allocation error");
+      *error = 1;
+    }
+  }
+  return result;
+}
+
+static char *cmd_roll(int margc, char **margv, int *error) {
+  char *result;
+  *error = 0;
+
+  if (margc < 2) {
+    result = strdup("Error: Roll what?");
+    *error = 1;
+    return result;
+  }
+
+  // check if the dice string is valid
+  int d_ct = 0; // number of instances of 'd' or 'D'
+  int is_valid = 1;
+  for (int i = 0; margv[1][i]; i++) {
+    if (margv[1][i] == 'd') {
+      d_ct++;
+    } else if (margv[1][i] == 'D') {
+      margv[1][i] = 'd';
+      d_ct++;
+    } else if (!isdigit(margv[1][i])) {
+      is_valid = 0;
+    }
+  }
+  if (margv[1][0] == 'd') is_valid = 0;
+  if (d_ct != 1) is_valid = 0;
+  if (!is_valid) {
+    const char *err_msg = "Syntax error: `\"";
+    const char *err_msg_end = "\"` is not valid dice notation.";
+    size_t result_len = snprintf(
+      NULL, 0, "%s%s%s",
+      err_msg, margv[1], err_msg_end
+    );
+    result = malloc(result_len+1);
+    sprintf(result, "%s%s%s", err_msg, margv[1], err_msg_end);
+    *error = 1;
+    return result;
+  }
+
+  // dice string has been validated, now we roll the dice
+  int dice_ct, faces;
+  int vals_scanned  = sscanf(margv[1], "%dd%d", &dice_ct, &faces);
+  if (faces < 1 || vals_scanned != 2) {
+    const char *err_msg_start = "Error: Invalid dice: ";
+    size_t result_len = snprintf(
+      NULL, 0,
+      "%s%s",
+      err_msg_start, margv[1]
+    );
+    result = malloc(result_len+1);
+    sprintf(result, "%s%s", err_msg_start, margv[1]);
+    *error = 1;
+    return result;
+  }
+  srand(time(NULL));
+  diceroll_t dice_roll = roll_dice(dice_ct, faces);
+  size_t result_len = snprintf(
+    NULL, 0,
+    "Result of rolling %dd%d: %d",
+    dice_roll.dice_ct, dice_roll.faces, dice_roll.value
+  );
+  result = malloc(result_len+1);
+  sprintf(
+    result,
+    "Result of rolling %dd%d: %d",
+    dice_roll.dice_ct, dice_roll.faces, dice_roll.value
+  );
+  save_diceroll(dice_roll);
+  return result;
+}
+
+static char *cmd_reroll(int margc, char **margv, int *error) {
+  char *result;
+  *error = 0;
+
+  diceroll_t last_roll = load_last_diceroll();
+  if (last_roll.value == -1) {
+    result = strdup("Backend error");
+    *error = 1;
+    return result;
+  }
+  srand(time(NULL));
+  diceroll_t new_roll = roll_dice(last_roll.dice_ct, last_roll.faces);
+  size_t result_len = snprintf(
+    NULL, 0,
+    "Result of rolling %dd%d: %d",
+    new_roll.dice_ct, new_roll.faces, new_roll.value
+  );
+  result = malloc(result_len+1);
+  sprintf(
+    result,
+    "Result of rolling %dd%d: %d",
+    new_roll.dice_ct, new_roll.faces, new_roll.value
+  );
+  save_diceroll(new_roll);
+  return result;
+}
+
 // this function is called from main.py and handles most commands
 char *handle_message(const char *msg) {
   // "m" is for "message"
@@ -256,184 +473,22 @@ char *handle_message(const char *msg) {
 
   // process command
   char *result;
+  int error;
   if (!strcmp(margv[0], "%commands")) {
-    command_vec_t *commands_vec = load_commands();
-    if (commands_vec == NULL) {
-      result = strdup("Backend error");
-      goto cleanup;
-    }
-    size_t result_len;
-    char *result_start = "List of commands supported by tryptobot:\n";
-    result_len = strlen(result_start);
-    for (int i = 0; i < commands_vec->size; i++) {
-      result_len += snprintf(
-        NULL, 0,
-        "`%s`\n",
-        commands_vec->commands[i].command
-      );
-    }
-    char *result_end = "For more info about a specific command, "
-                       "try `%cmdinfo <command>`.\n";
-    result_len += strlen(result_end);
-    result = malloc(result_len + 1);
-    strcpy(result, result_start);
-    for (int i = 0; i < commands_vec->size; i++) {
-      sprintf(
-        result + strlen(result),
-        "`%s`\n",
-        commands_vec->commands[i].command
-      );
-    }
-    strcat(result, result_end);
-    for (int i = 0; i < commands_vec->size; i++)
-      free_command_t_members(commands_vec->commands + i);
-    free(commands_vec->commands);
-    free(commands_vec);
+    result = cmd_commands(margc, margv, &error);
+    if (error) goto cleanup;
   } else if (!strcmp(margv[0], "%cmdinfo")) {
-    if (margc < 2) {
-      result = strdup(
-        "Error: no command specified. "
-        "Syntax is `%cmdinfo <command>`."
-      );
-      goto cleanup;
-    }
-    char *queried_command = margv[1];
-    command_vec_t *commands_vec = load_commands();
-    command_t *result_command = NULL; // non-owning pointer
-    for (int i = 0; i < commands_vec->size; i++) {
-      if (!strcmp(commands_vec->commands[i].command, queried_command)) {
-        result_command = commands_vec->commands + i;
-      }
-    }
-    if (result_command == NULL) {
-      char *err_msg_start = "Unable to find info for command `";
-      char *err_msg_end = "`. Did you forget to include a leading '%'?";
-      size_t result_len = snprintf(
-        NULL, 0,
-        "%s%s%s",
-        err_msg_start, queried_command, err_msg_end
-      );
-      result = malloc(result_len + 1);
-      sprintf(
-        result,
-        "%s%s%s",
-        err_msg_start, queried_command, err_msg_end
-      );
-    } else {
-      char *result_pt_0 = "Command syntax: `";
-      char *result_pt_1 = "`\nCommand description: ";
-      size_t result_len = snprintf(
-        NULL, 0,
-        "%s%s%s%s",
-        result_pt_0, result_command->syntax,
-        result_pt_1, result_command->description
-      );
-      result = malloc(result_len + 1);
-      sprintf(
-        result,
-        "%s%s%s%s",
-        result_pt_0, result_command->syntax,
-        result_pt_1, result_command->description
-      );
-    }
-    for (int i = 0; i < commands_vec->size; i++)
-      free_command_t_members(commands_vec->commands + i);
-    free(commands_vec->commands);
-    free(commands_vec);
+    result = cmd_cmdinfo(margc, margv, &error);
+    if (error) goto cleanup;
   } else if (!strcmp(margv[0], "%reverse")) {
-    if (margc == 2 && !strcmp(margv[1], "Ipswich")) {
-      result = strdup("Bolton");
-    } else if (margc == 2 && !strcmp(margv[1], "ipswich")) {
-      result = strdup("bolton");
-    } else {
-      char *msg_ptr = (char *) msg + 9; // 9 == strlen("%reverse ")
-      while (*msg_ptr == ' ') msg_ptr++;
-      result = utf8_reverse(msg_ptr, strlen(msg_ptr) + 1);
-      if (result == NULL) {
-        result = strdup("Memory allocation error");
-      }
-    }
+    result = cmd_reverse(margc, margv, msg, &error);
+    if (error) goto cleanup;
   } else if (!strcmp(margv[0], "%roll")) {
-    if (margc < 2) {
-      result = strdup("Error: Roll what?");
-      goto cleanup;
-    }
-
-    // check if the dice string is valid
-    int d_ct = 0; // number of instances of 'd' or 'D'
-    int is_valid = 1;
-    for (int i = 0; margv[1][i]; i++) {
-      if (margv[1][i] == 'd') {
-        d_ct++;
-      } else if (margv[1][i] == 'D') {
-        margv[1][i] = 'd';
-        d_ct++;
-      } else if (!isdigit(margv[1][i])) {
-        is_valid = 0;
-      }
-    }
-    if (margv[1][0] == 'd') is_valid = 0;
-    if (d_ct != 1) is_valid = 0;
-    if (!is_valid) {
-      char *err_msg = "Syntax error: `\"";
-      char *err_msg_end = "\"` is not valid dice notation.";
-      size_t result_len = snprintf(
-        NULL, 0, "%s%s%s",
-        err_msg, margv[1], err_msg_end
-      );
-      result = malloc(result_len+1);
-      sprintf(result, "%s%s%s", err_msg, margv[1], err_msg_end);
-      goto cleanup;
-    }
-
-    // dice string has been validated, now we roll the dice
-    int dice_ct, faces;
-    int vals_scanned  = sscanf(margv[1], "%dd%d", &dice_ct, &faces);
-    if (faces < 1 || vals_scanned != 2) {
-      char *err_msg_start = "Error: Invalid dice: ";
-      size_t result_len = snprintf(
-        NULL, 0,
-        "%s%s",
-        err_msg_start, margv[1]
-      );
-      result = malloc(result_len+1);
-      sprintf(result, "%s%s", err_msg_start, margv[1]);
-      goto cleanup;
-    }
-    srand(time(NULL));
-    diceroll_t dice_roll = roll_dice(dice_ct, faces);
-    size_t result_len = snprintf(
-      NULL, 0,
-      "Result of rolling %dd%d: %d",
-      dice_roll.dice_ct, dice_roll.faces, dice_roll.value
-    );
-    result = malloc(result_len+1);
-    sprintf(
-      result,
-      "Result of rolling %dd%d: %d",
-      dice_roll.dice_ct, dice_roll.faces, dice_roll.value
-    );
-    save_diceroll(dice_roll);
+    result = cmd_roll(margc, margv, &error);
+    if (error) goto cleanup;
   } else if (!strcmp(margv[0], "%reroll")) {
-    diceroll_t last_roll = load_last_diceroll();
-    if (last_roll.value == -1) {
-      result = strdup("Backend error");
-      goto cleanup;
-    }
-    srand(time(NULL));
-    diceroll_t new_roll = roll_dice(last_roll.dice_ct, last_roll.faces);
-    size_t result_len = snprintf(
-      NULL, 0,
-      "Result of rolling %dd%d: %d",
-      new_roll.dice_ct, new_roll.faces, new_roll.value
-    );
-    result = malloc(result_len+1);
-    sprintf(
-      result,
-      "Result of rolling %dd%d: %d",
-      new_roll.dice_ct, new_roll.faces, new_roll.value
-    );
-    save_diceroll(new_roll);
+    result = cmd_reroll(margc, margv, &error);
+    if (error) goto cleanup;
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
