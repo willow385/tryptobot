@@ -349,6 +349,34 @@ static char *cmd_reverse(
   return result;
 }
 
+/**
+* Checks if diceroll_str is valid dice syntax. If an
+* uppercase 'D' is present in diceroll_str,  it will
+* be replaced with a lowercase 'd',  hence why it is
+* passed  as  a  char *  instead of a  const char *.
+* Returns 1 if diceroll_str is valid, and 0 if it is
+* not.
+* ==================================================
+* TODO implement modifiers (e.g. "2d20+3")
+*/
+static int is_valid_diceroll_str(char *diceroll_str) {
+  int d_ct = 0; // number of instances of 'd' or 'D'
+  int result = 1;
+  for (int i = 0; diceroll_str[i]; i++) {
+    if (diceroll_str[i] == 'd') {
+      d_ct++;
+    } else if (diceroll_str[i] == 'D') {
+      diceroll_str[i] = 'd';
+      d_ct++;
+    } else if (!isdigit(diceroll_str[i])) {
+      result = 0;
+    }
+  }
+  if (diceroll_str[0] == 'd') result = 0;
+  if (d_ct != 1) result = 0;
+  return result;
+}
+
 static char *cmd_roll(int margc, char **margv, int *error) {
   char *result;
   *error = 0;
@@ -360,21 +388,7 @@ static char *cmd_roll(int margc, char **margv, int *error) {
   }
 
   // check if the dice string is valid
-  int d_ct = 0; // number of instances of 'd' or 'D'
-  int is_valid = 1;
-  for (int i = 0; margv[1][i]; i++) {
-    if (margv[1][i] == 'd') {
-      d_ct++;
-    } else if (margv[1][i] == 'D') {
-      margv[1][i] = 'd';
-      d_ct++;
-    } else if (!isdigit(margv[1][i])) {
-      is_valid = 0;
-    }
-  }
-  if (margv[1][0] == 'd') is_valid = 0;
-  if (d_ct != 1) is_valid = 0;
-  if (!is_valid) {
+  if (!is_valid_diceroll_str(margv[1])) {
     const char *err_msg = "Syntax error: `\"";
     const char *err_msg_end = "\"` is not valid dice notation.";
     size_t result_len = snprintf(
