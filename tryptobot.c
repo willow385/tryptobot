@@ -35,7 +35,7 @@ static unsigned char *utf8_reverse(const unsigned char *str, int size) {
     pos -= char_size;
     memcpy(ret + ret_size, str + pos + 1, char_size);
     ret_size += char_size;
-  }    
+  }
 
   ret[ret_size] = '\0';
 
@@ -270,7 +270,7 @@ static char *cmd_commands(int margc, char **margv, int *error) {
 
 static char *cmd_cmdinfo(int margc, char **margv, int *error) {
   char *result;
-  *error = 0; 
+  *error = 0;
   if (margc < 2) {
     result = strdup(
       "Error: no command specified. "
