@@ -197,7 +197,7 @@ static diceroll_t load_last_diceroll(void) {
     return result;
   } else {
     fprintf(stderr, "Unable to read last dice roll\n");
-    return (diceroll_t){-1, -1, -1};
+    return (diceroll_t){-1, -1, -1, -1};
   }
 }
 
@@ -384,17 +384,32 @@ static int is_valid_diceroll_str(char *diceroll_str) {
 }
 
 static char *get_diceroll_result_str(diceroll_t diceroll) {
-  size_t result_len = snprintf(
-    NULL, 0,
-    "Result of rolling %dd%d+%d: %d",
-    diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
-  );
-  char *result = malloc(result_len+1);
-  sprintf(
-    result,
-    "Result of rolling %dd%d+%d: %d",
-    diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
-  );
+  char *result;
+  if (diceroll.modifier) {
+    size_t result_len = snprintf(
+      NULL, 0,
+      "Result of rolling %dd%d+%d: %d",
+      diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
+    );
+    result = malloc(result_len+1);
+    sprintf(
+      result,
+      "Result of rolling %dd%d+%d: %d",
+      diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
+    );
+  } else {
+    size_t result_len = snprintf(
+      NULL, 0,
+      "Result of rolling %dd%d: %d",
+      diceroll.dice_ct, diceroll.faces, diceroll.value
+    );
+    result = malloc(result_len+1);
+    sprintf(
+      result,
+      "Result of rolling %dd%d: %d",
+      diceroll.dice_ct, diceroll.faces, diceroll.value
+    );
+  }
   return result;
 }
 

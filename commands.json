@@ -22,8 +22,8 @@
     },
     {
       "command": "%roll",
-      "syntax": "%roll <count>d<n>",
-      "description": "Returns the result of rolling <count> virtual dice with <n> faces. <count> and <n> must be integers less than 50,000. Negative values of <n> are a syntax error. Results are guaranteed to be fair, as they are cryptographically random. See also `%reroll`."
+      "syntax": "%roll <count>d<n>[+<modifier>]",
+      "description": "Returns the result of rolling <count> virtual dice with <n> faces. <count> and <n> must be integers less than 2³¹-1. Negative values of <n> are a syntax error. Results are decently fair; they are calculated using libc's rand() function, seeded with srand(time(NULL)). If a modifier is used, it will be added to the result of the dice roll. It is undefined behavior to use values for <count>, <n>, and <modifier> such that results greater than 2³¹-1 are mathematically possible. See also `%reroll`."
     },
     {
       "command": "%reroll",
