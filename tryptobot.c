@@ -182,7 +182,7 @@ static command_vec_t *load_commands(void) {
 }
 
 typedef struct diceroll_t {
-  int dice_ct, faces, value;
+  int dice_ct, faces, modifier, value;
 } diceroll_t;
 
 static diceroll_t load_last_diceroll(void) {
@@ -191,8 +191,8 @@ static diceroll_t load_last_diceroll(void) {
     diceroll_t result;
     sscanf(
       last_diceroll_str,
-      "dice:%dd%d;val:%d;",
-      &result.dice_ct, &result.faces, &result.value
+      "dice:%dd%d+%d;val:%d;",
+      &result.dice_ct, &result.faces, &result.modifier, &result.value
     );
     return result;
   } else {
@@ -205,8 +205,8 @@ static void save_diceroll(diceroll_t diceroll) {
   FILE *f = fopen("lastroll.txt", "w+");
   if (f) {
     fprintf(
-      f, "dice:%dd%d;val:%d;",
-      diceroll.dice_ct, diceroll.faces, diceroll.value
+      f, "dice:%dd%d+%d;val:%d;",
+      diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
     );
     fclose(f);
   } else {
@@ -218,14 +218,16 @@ static int random_int(int min, int max){
   return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
-static diceroll_t roll_dice(int dice_ct, int faces) {
+static diceroll_t roll_dice(int dice_ct, int faces, int modifier) {
   diceroll_t result;
   result.dice_ct = dice_ct;
   result.faces = faces;
+  result.modifier = modifier;
   result.value = 0;
   for (int i = 0; i < dice_ct; i++) {
     result.value += random_int(1, faces);
   }
+  result.value += result.modifier;
   return result;
 }
 
@@ -361,6 +363,7 @@ static char *cmd_reverse(
 */
 static int is_valid_diceroll_str(char *diceroll_str) {
   int d_ct = 0; // number of instances of 'd' or 'D'
+  int plus_ct = 0; // number of instances of '+'
   int result = 1;
   for (int i = 0; diceroll_str[i]; i++) {
     if (diceroll_str[i] == 'd') {
@@ -368,12 +371,30 @@ static int is_valid_diceroll_str(char *diceroll_str) {
     } else if (diceroll_str[i] == 'D') {
       diceroll_str[i] = 'd';
       d_ct++;
+    } else if (diceroll_str[i] == '+') {
+      plus_ct++;
     } else if (!isdigit(diceroll_str[i])) {
       result = 0;
     }
   }
   if (diceroll_str[0] == 'd') result = 0;
   if (d_ct != 1) result = 0;
+  if (plus_ct > 1) result = 0;
+  return result;
+}
+
+static char *get_diceroll_result_str(diceroll_t diceroll) {
+  size_t result_len = snprintf(
+    NULL, 0,
+    "Result of rolling %dd%d+%d: %d",
+    diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
+  );
+  char *result = malloc(result_len+1);
+  sprintf(
+    result,
+    "Result of rolling %dd%d+%d: %d",
+    diceroll.dice_ct, diceroll.faces, diceroll.modifier, diceroll.value
+  );
   return result;
 }
 
@@ -402,9 +423,9 @@ static char *cmd_roll(int margc, char **margv, int *error) {
   }
 
   // dice string has been validated, now we roll the dice
-  int dice_ct, faces;
-  int vals_scanned  = sscanf(margv[1], "%dd%d", &dice_ct, &faces);
-  if (faces < 1 || vals_scanned != 2) {
+  int dice_ct, faces, modifier;
+  int vals_scanned  = sscanf(margv[1], "%dd%d+%d", &dice_ct, &faces, &modifier);
+  if (faces < 1 || vals_scanned < 2 || vals_scanned > 3) {
     const char *err_msg_start = "Error: Invalid dice: ";
     size_t result_len = snprintf(
       NULL, 0,
@@ -416,20 +437,11 @@ static char *cmd_roll(int margc, char **margv, int *error) {
     *error = 1;
     return result;
   }
+  if (vals_scanned == 2) modifier = 0;
   srand(time(NULL));
-  diceroll_t dice_roll = roll_dice(dice_ct, faces);
-  size_t result_len = snprintf(
-    NULL, 0,
-    "Result of rolling %dd%d: %d",
-    dice_roll.dice_ct, dice_roll.faces, dice_roll.value
-  );
-  result = malloc(result_len+1);
-  sprintf(
-    result,
-    "Result of rolling %dd%d: %d",
-    dice_roll.dice_ct, dice_roll.faces, dice_roll.value
-  );
-  save_diceroll(dice_roll);
+  diceroll_t diceroll = roll_dice(dice_ct, faces, modifier);
+  result = get_diceroll_result_str(diceroll);
+  save_diceroll(diceroll);
   return result;
 }
 
@@ -444,18 +456,8 @@ static char *cmd_reroll(int margc, char **margv, int *error) {
     return result;
   }
   srand(time(NULL));
-  diceroll_t new_roll = roll_dice(last_roll.dice_ct, last_roll.faces);
-  size_t result_len = snprintf(
-    NULL, 0,
-    "Result of rolling %dd%d: %d",
-    new_roll.dice_ct, new_roll.faces, new_roll.value
-  );
-  result = malloc(result_len+1);
-  sprintf(
-    result,
-    "Result of rolling %dd%d: %d",
-    new_roll.dice_ct, new_roll.faces, new_roll.value
-  );
+  diceroll_t new_roll = roll_dice(last_roll.dice_ct, last_roll.faces, last_roll.modifier);
+  result = get_diceroll_result_str(new_roll);
   save_diceroll(new_roll);
   return result;
 }

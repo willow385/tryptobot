@@ -1,1 +1,1 @@
-dice:5d76;val:211;
+dice:3d20+2;val:14;
