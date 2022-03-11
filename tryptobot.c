@@ -154,6 +154,7 @@ static command_vec_t *load_commands(void) {
   for (int i = 0; json_array[i]; i++) {
     if (json_array[i] == '{') command_ct++;
   }
+  free(json_array);
 
   // get the data from the JSON and return it
   command_vec_t *result = malloc(sizeof(command_vec_t));
