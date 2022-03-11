@@ -8,7 +8,7 @@
 
 // copied from here https://stackoverflow.com/a/19674312
 static unsigned char *utf8_reverse(const unsigned char *str, int size) {
-  unsigned char *ret = calloc(size, sizeof(unsigned char*));
+  unsigned char *ret = calloc(size, sizeof(unsigned char));
   int ret_size = 0;
   int pos = size - 2;
   int char_size = 0;
