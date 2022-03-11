@@ -360,7 +360,6 @@ static char *cmd_reverse(
 * Returns 1 if diceroll_str is valid, and 0 if it is
 * not.
 * ==================================================
-* TODO implement modifiers (e.g. "2d20+3")
 */
 static int is_valid_diceroll_str(char *diceroll_str) {
   int d_ct = 0; // number of instances of 'd' or 'D'
