@@ -29,6 +29,11 @@
       "command": "%reroll",
       "syntax": "%reroll",
       "description": "Rerolls the last valid dice roll. For example, if the last person to roll the dice rolled 2d20, this command will roll 2d20 and return the result. This command may be repeated an indefinite number of times. Invalid dice rolls will be ignored."
+    },
+    {
+      "command": "%calcmod",
+      "syntax": "%calcmod <ability score>",
+      "description": "Calculates the appropriate Modifier for the given Ability score."
     }
   ]
 }
