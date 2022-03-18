@@ -1,0 +1,7 @@
+~~ This is the sheet for a default DnD character.
+~~ Reserved words start with '@'.
+~~ Comments start with two tildes.
+@section ability:
+  "strength": %stat[ability:10;mod:]
+@end-section
+

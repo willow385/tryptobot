@@ -464,6 +464,43 @@ static char *cmd_reroll(int margc, char **margv) {
   return result;
 }
 
+static char *cmd_calcmod(int margc, char **margv) {
+  char *result;
+  if (margc < 2) {
+    result = strdup(
+      "Error: Specify an Ability score for which "
+      "to calculate the modifier."
+    );
+    return result;
+  }
+
+  int ability_score;
+  int got_score = sscanf(margv[1], "%d", &ability_score);
+  if (got_score < 1 || ability_score < 1) {
+    result = strdup("Error: this command requires a valid, positive, non-zero integer.");
+    return result;
+  }
+
+  int modifier = -5;
+  for (int i = 1; i < ability_score; i += 2) {
+    modifier++;
+  }
+
+  const char *result_start = "Modifier for Ability score ";
+  size_t result_len = snprintf(
+    NULL, 0,
+    "%s%d: %d",
+    result_start, ability_score, modifier
+  );
+  result = malloc(result_len+1);
+  sprintf(
+    result,
+    "%s%d: %d",
+    result_start, ability_score, modifier
+  );
+  return result;
+}
+
 // this function is called from main.py and handles most commands
 char *handle_message(const char *msg) {
   // "m" is for "message"
@@ -501,6 +538,8 @@ char *handle_message(const char *msg) {
     result = cmd_roll(margc, margv);
   } else if (!strcmp(margv[0], "%reroll")) {
     result = cmd_reroll(margc, margv);
+  } else if (!strcmp(margv[0], "%calcmod")) {
+    result = cmd_calcmod(margc, margv);
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
