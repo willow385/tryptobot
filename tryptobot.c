@@ -232,13 +232,11 @@ static diceroll_t roll_dice(int dice_ct, int faces, int modifier) {
   return result;
 }
 
-static char *cmd_commands(int margc, char **margv, int *error) {
+static char *cmd_commands(int margc, char **margv) {
   char *result;
-  *error = 0;
   command_vec_t *commands_vec = load_commands();
   if (commands_vec == NULL) {
     result = strdup("Backend error");
-    *error = 1;
     return result;
   }
   size_t result_len;
@@ -271,15 +269,13 @@ static char *cmd_commands(int margc, char **margv, int *error) {
   return result;
 }
 
-static char *cmd_cmdinfo(int margc, char **margv, int *error) {
+static char *cmd_cmdinfo(int margc, char **margv) {
   char *result;
-  *error = 0;
   if (margc < 2) {
     result = strdup(
       "Error: no command specified. "
       "Syntax is `%cmdinfo <command>`."
     );
-    *error = 1;
     return result;
   }
   const char *queried_command = margv[1];
@@ -331,11 +327,9 @@ static char *cmd_cmdinfo(int margc, char **margv, int *error) {
 static char *cmd_reverse(
   int margc,
   char **margv,
-  const char *msg, // should be pointer passed to handle_message as msg
-  int *error
+  const char *msg // should be pointer passed to handle_message as msg
 ) {
   char *result;
-  *error = 0;
   if (margc == 2 && !strcmp(margv[1], "Ipswich")) {
     result = strdup("Bolton");
   } else if (margc == 2 && !strcmp(margv[1], "ipswich")) {
@@ -346,7 +340,6 @@ static char *cmd_reverse(
     result = utf8_reverse(msg_ptr, strlen(msg_ptr) + 1);
     if (result == NULL) {
       result = strdup("Memory allocation error");
-      *error = 1;
     }
   }
   return result;
@@ -413,13 +406,11 @@ static char *get_diceroll_result_str(diceroll_t diceroll) {
   return result;
 }
 
-static char *cmd_roll(int margc, char **margv, int *error) {
+static char *cmd_roll(int margc, char **margv) {
   char *result;
-  *error = 0;
 
   if (margc < 2) {
     result = strdup("Error: Roll what?");
-    *error = 1;
     return result;
   }
 
@@ -433,7 +424,6 @@ static char *cmd_roll(int margc, char **margv, int *error) {
     );
     result = malloc(result_len+1);
     sprintf(result, "%s%s%s", err_msg, margv[1], err_msg_end);
-    *error = 1;
     return result;
   }
 
@@ -449,7 +439,6 @@ static char *cmd_roll(int margc, char **margv, int *error) {
     );
     result = malloc(result_len+1);
     sprintf(result, "%s%s", err_msg_start, margv[1]);
-    *error = 1;
     return result;
   }
   if (vals_scanned == 2) modifier = 0;
@@ -460,14 +449,12 @@ static char *cmd_roll(int margc, char **margv, int *error) {
   return result;
 }
 
-static char *cmd_reroll(int margc, char **margv, int *error) {
+static char *cmd_reroll(int margc, char **margv) {
   char *result;
-  *error = 0;
 
   diceroll_t last_roll = load_last_diceroll();
   if (last_roll.value == -1) {
     result = strdup("Backend error");
-    *error = 1;
     return result;
   }
   srand(time(NULL));
@@ -504,22 +491,16 @@ char *handle_message(const char *msg) {
 
   // process command
   char *result;
-  int error;
   if (!strcmp(margv[0], "%commands")) {
-    result = cmd_commands(margc, margv, &error);
-    if (error) goto cleanup;
+    result = cmd_commands(margc, margv);
   } else if (!strcmp(margv[0], "%cmdinfo")) {
-    result = cmd_cmdinfo(margc, margv, &error);
-    if (error) goto cleanup;
+    result = cmd_cmdinfo(margc, margv);
   } else if (!strcmp(margv[0], "%reverse")) {
-    result = cmd_reverse(margc, margv, msg, &error);
-    if (error) goto cleanup;
+    result = cmd_reverse(margc, margv, msg);
   } else if (!strcmp(margv[0], "%roll")) {
-    result = cmd_roll(margc, margv, &error);
-    if (error) goto cleanup;
+    result = cmd_roll(margc, margv);
   } else if (!strcmp(margv[0], "%reroll")) {
-    result = cmd_reroll(margc, margv, &error);
-    if (error) goto cleanup;
+    result = cmd_reroll(margc, margv);
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";
@@ -528,7 +509,6 @@ char *handle_message(const char *msg) {
     snprintf(result, size, "%s%s%s", err_msg, margv[0], err_msg_end);
   }
 
-cleanup:
   for (int i = 0; i < margc-1; i++) {
     free(margv[i]);
   }
