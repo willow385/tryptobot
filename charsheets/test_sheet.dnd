@@ -1,7 +1,145 @@
-~~ This is the sheet for a default DnD character.
+~~ This is the sheet for an example DnD character.
 ~~ Reserved words start with '@'.
+~~ Parameterizable values start with '%'.
 ~~ Comments start with two tildes.
 @section ability:
-  "strength": %stat[ability:10;mod:]
+  @field str: %stat[ability:11; mod:0];
+  @field dex: %stat[ability:14; mod:2];
+  @field con: %stat[ability:17; mod:3];
+  @field int: %stat[ability:20; mod:5];
+  @field wis: %stat[ability:13; mod:1];
+  @field cha: %stat[ability:9;  mod:-1];
 @end-section
 
+@section header-stats:
+  ~~ The string type can contain a sequence of any ASCII characters.
+  @field name:  %string["Johnny Bleedknuckles"];
+  @field class: %string["Wizard"];
+  @field race:  %string["Human"];
+  ~~ The int type can be any 32-bit signed integer.
+  @field level: %int[15];
+  @field background: %string["Sage"];
+  @field xp: %int[178200];
+@end-section
+
+@section skills:
+  @field acrobatics: %int[2];
+  @field animal-handling: %int[1];
+  @field arcana: %int[10];
+  @field athletics: %int[0];
+  @field deception: %int[-1];
+  @field history: %int[10];
+  @field insight: %int[1];
+  @field intimidation: %int[-1];
+  @field investigation: %int[10];
+  @field medicine: %int[6];
+  @field nature: %int[5];
+  @field perception: %int[1];
+  @field performance: %int[-1];
+  @field persuasion: %int[-1];
+  @field religion: %int[5];
+  @field sleight-of-hand: %int[2];
+  @field stealth: %int[2];
+  @field survival: %int[1];
+@end-section
+
+@section saving-throws:
+  @field str: %int[0];
+  @field dex: %int[2];
+  @field con: %int[3];
+  @field int: %int[10];
+  @field wis: %int[6];
+  @field cha: %int[-1];
+@end-section
+
+@section personal-stats:
+  @field ac: %int[12];
+  @field init: %int[2]; ~~ initiative
+  @field speed: %string["30ft walking"];
+  @field hp: %int [107];
+  @field hitdice: %dice[15d6];
+  @field deathsaves: %deathsaves[succ:0;fail:0];
+@end-section
+
+@section proficiencies-and-languages:
+  @field armor:     %string["none"];
+  @field weapons:   %string["dagger, dart, light crossbow, quarterstaff, sling"];
+  @field tools:     %string["none"];
+  @field saving-throws: %string["Intelligence, Wisdom"];
+  @field skills:    %string["Arcana, History, Investigation, Medicine"];
+  @field languages: %string["Common, Dwarvish, Goblin, Halfling"];
+@end-section
+
+@section attacks-and-spells:
+  @field attacks: %itemlist[
+    %item[
+      val: "Basic Attack: One target per Attack action.";
+      qty: NULL
+    ];
+    %item[
+      val: "Dagger. Melee or Ranged Weapon Attack: +7 to hit, reach 5 ft. 1d4+2 piercing damage. (If thrown, normal range to 20 ft.; disadvantage long range 21 to 60 ft.)";
+      qty: NULL
+    ];
+    %item[
+      val: "Dagger (offhand as bonus action): As above but only 1d4 piercing damage.";
+      qty: NULL
+    ];
+    %item[
+      val: "Quarterstaff. Melee Weapon Attack: +5 to hit, reach 5 ft. Hit: 1d6+0 bludgeoning damage. (If used two-handed in melee, does 1d8+0 damage.)";
+      qty: NULL
+    ];
+  ];
+
+  @field spells: %itemlist[
+    %item[
+      val: "Ray Of Frost Cantrip. Ranged Spell Attack: +10 to hit, targets one creature or object within 60 ft. range. Hit: 3d8 cold damage and target's speed reduced by 10 feet for one round.";
+      qty: NULL
+    ];
+  ];
+@end-section
+
+@section equipment:
+  @field gear: %itemlist[
+    %item[val:"dagger";qty:2];
+    %item[val:"quarterstaff";qty:1];
+    %item[val:"belt pouch";qty:1];
+    %item[val:"set of common clothes";qty:1];
+    %item[val:"bottle of black ink";qty:1];
+    %item[val:"quill";qty:1];
+    %item[val:"small knife";qty:1];
+    %item[val:"personal papers";qty:1];
+  ];
+
+  @field money: %itemlist[
+    %item[val:"gp";qty:5759];
+    %item[val:"sp";qty:37];
+    %item[val:"cp";qty:4];
+    %item[val:"gems";qty:3];
+  ];
+@end-section
+
+@section etc:
+  @field alignment: %string["chaotic good"];
+  @field personality-traits: %string[foo bar];
+  @field ideals: %string[being a valid C identifier];
+  @field bonds: %string[conforming to the ANSI C standard];
+  @field flaws: %string[undefined behavior];
+
+  @field features-and-traits: %string[
+"Human Traits (PHB p. 29)
+o Creature Type: Humanoid
+o Age: 39 years old
+o Medium Size (5' 8", 146 lbs.)
+
+Wizard Class Features (PHB p. 112, TCoE p. 77)
+o Ritual Casting
+o Arcane Recovery (regain spell slots totalling 8 levels [max. 6th level] after short rest once per day)
+o Wizardly Quill (automated pen)
+o Awakened Spellbook (spellcasting focus, change spell damage type, fast ritual casting)
+o Manifest Mind (familiar-like spectral mind)
+o One With The Word (adv. on Arcana checks, trade spellbook spells to negate damage)"
+  ];
+
+  @field other: %string["Put anything you want here."];
+
+@end-section
