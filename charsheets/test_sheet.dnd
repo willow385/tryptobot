@@ -120,16 +120,16 @@
 
 @section etc:
   @field alignment: %string["chaotic good"];
-  @field personality-traits: %string[foo bar];
-  @field ideals: %string[being a valid C identifier];
-  @field bonds: %string[conforming to the ANSI C standard];
-  @field flaws: %string[undefined behavior];
+  @field personality-traits: %string["foo bar"];
+  @field ideals: %string["being a valid C identifier"];
+  @field bonds: %string["conforming to the ANSI C standard"];
+  @field flaws: %string["undefined behavior"];
 
   @field features-and-traits: %string[
 "Human Traits (PHB p. 29)
 o Creature Type: Humanoid
 o Age: 39 years old
-o Medium Size (5' 8", 146 lbs.)
+o Medium Size (5' 8\", 146 lbs.)
 
 Wizard Class Features (PHB p. 112, TCoE p. 77)
 o Ritual Casting

@@ -42,13 +42,13 @@ static unsigned char *utf8_reverse(const unsigned char *str, int size) {
   return ret;
 }
 
-typedef struct command_t {
+typedef struct command {
   char *command;
   char *syntax;
   char *description;
 } command_t;
 
-typedef struct command_vec_t {
+typedef struct command_vec {
   size_t size;
   command_t *commands;
 } command_vec_t;
@@ -182,7 +182,7 @@ static command_vec_t *load_commands(void) {
   return result;
 }
 
-typedef struct diceroll_t {
+typedef struct diceroll {
   int dice_ct, faces, modifier, value;
 } diceroll_t;
 
