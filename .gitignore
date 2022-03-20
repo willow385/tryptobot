@@ -1,4 +1,6 @@
 *.so
+*.o
+*.x86
 __pycache__/
 poetry.lock
 venv/
