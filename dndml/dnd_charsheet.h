@@ -28,12 +28,12 @@ typedef struct field {
     struct itemlist itemlist_val; // %itemlist
     struct item item_val; // %item
   };
-  char *identifier;
+  char *identifier; // heap-allocated
   enum token_type type;
 } field_t;
 
 typedef struct section {
-  char *identifier;
+  char *identifier; // heap-allocated
   field_t *fields;
   size_t field_count;
 } section_t;
