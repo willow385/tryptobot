@@ -1,14 +1,57 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include "dnd_input_reader.h"
 #include "dnd_lexer.h"
+
+const char *reserved_words[] = {
+  "@section",
+  "@end-section",
+  "@field",
+  "%stat",
+  "%string",
+  "%int",
+  "%dice",
+  "%deathsaves",
+  "%itemlist",
+  "%item",
+  "NULL"
+};
+
+size_t reserved_word_count = 11;
+
+static inline void lex_at_label_or_type_label(lexer_t *lex, token_t *dest) {
+  dest->start = lex->input_reader->pos;
+  lex->input_reader->advance(lex->input_reader); // skip the '%' or '@'
+  while (isalpha(lex->input_reader->current_char) ||
+         lex->input_reader->current_char == '-'   ||
+         lex->input_reader->current_char == '_') {
+    lex->input_reader->advance(lex->input_reader);
+  }
+  dest->end = lex->input_reader->pos;
+
+  /* If the proceeding for-loop doesn't assign a token_type to dest->type,
+     it will have the syntax_error type by default, since any type_label
+     not in reserved_words is in fact a syntax error. */
+  dest->type = syntax_error;
+  for (enum token_type i = 0; i < reserved_word_count; i++) {
+    if (!strncmp(
+      dest->src_text + dest->start,
+      reserved_words[i],
+      dest->end - dest->start
+    )) {
+      dest->type = i;
+      break;
+    }
+  }
+}
 
 /**
  * The reserved words that start with '@' shall
  * be referred to by convention as "at_labels".
  */
 static void lex_at_label(lexer_t *lex, token_t *dest) {
-  
+  lex_at_label_or_type_label(lex, dest);
 }
 
 /**
@@ -16,11 +59,26 @@ static void lex_at_label(lexer_t *lex, token_t *dest) {
  * referred to by convention as "type_labels".
  */
 static void lex_type_label(lexer_t *lex, token_t *dest) {
-  
+  lex_at_label_or_type_label(lex, dest);
 }
 
 static void lex_identifier(lexer_t *lex, token_t *dest) {
-  
+  dest->start = lex->input_reader->pos;
+  while (isalpha(lex->input_reader->current_char) ||
+         lex->input_reader->current_char == '-'   ||
+         lex->input_reader->current_char == '_') {
+    lex->input_reader->advance(lex->input_reader);
+  }
+  dest->end = lex->input_reader->pos;
+  if (!strncmp(
+    dest->src_text + dest->start,
+    reserved_words[null_val],
+    dest->end - dest->start
+  )) {
+    dest->type = null_val;
+  } else {
+    dest->type = identifier;
+  }
 }
 
 static void lex_number(lexer_t *lex, token_t *dest) {
@@ -33,8 +91,35 @@ static void lex_number(lexer_t *lex, token_t *dest) {
   dest->end = lex->input_reader->pos;
 }
 
+#define INSIDE_STRING_LITERAL(lex, i)          \
+  lex->input_reader->text[i] != '"' ||         \
+  (lex->input_reader->text[i] == '"'           \
+    && lex->input_reader->text[i - 1] == '\\'  \
+    && lex->input_reader->text[i - 2] != '\\')
+
 static void lex_string_literal(lexer_t *lex, token_t *dest) {
-  
+  if (lex->input_reader->current_char == '"') {
+    dest->type = string_literal;
+    dest->start = lex->input_reader->pos;
+    lex->input_reader->advance(lex->input_reader);
+  } else {
+    fprintf(
+      stderr,
+      "Error while lexing: String literals must begin with '\"'\n"
+    );
+    dest->type = syntax_error;
+    dest->start = lex->input_reader->pos;
+    dest->end = dest->start + 1;
+    return;
+  }
+
+  while (INSIDE_STRING_LITERAL(lex, lex->input_reader->pos)) {
+    lex->input_reader->advance(lex->input_reader);
+  }
+  // skip the closing quotation mark when done looping
+  lex->input_reader->advance(lex->input_reader);
+
+  dest->end = lex->input_reader->pos;
 }
 
 static void skip_whitespace(lexer_t *lex) {

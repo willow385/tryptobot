@@ -23,6 +23,7 @@ enum token_type {
   deathsave_val = 7, // %deathsaves
   itemlist_val = 8,  // %itemlist
   item_val = 9,      // %item
+  null_val = 10,     // NULL
   identifier,        // what might come right after @section or @field
 
   plus_sign,
@@ -32,25 +33,13 @@ enum token_type {
   close_sqr_bracket,
   int_literal,
   string_literal,
-  null_val, // NULL can go anywhere a string or int literal is expected
 
   syntax_error
 };
 
-const char *reserved_words[] = {
-  "@section",
-  "@end-section",
-  "@field",
-  "%stat",
-  "%string",
-  "%int",
-  "%dice",
-  "%deathsaves",
-  "%itemlist",
-  "%item"
-};
+extern const char *reserved_words[];
 
-size_t reserved_word_count = 10;
+extern size_t reserved_word_count;
 
 typedef struct token {
   const char *src_text; // non-owning
