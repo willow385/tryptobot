@@ -31,9 +31,9 @@ static char *load_file_to_str(const char *filename) {
 }
 
 /*
- gcc -c dnd_input_reader.c -Wall
- gcc -c dnd_lexer.c -Wall
- gcc test_dnd_lexer.c dnd_input_reader.o dnd_lexer.o -o test-lex.x86 -Wall
+ gcc -c dnd_input_reader.c -Wall -std=gnu11
+ gcc -c dnd_lexer.c -Wall -std=gnu11
+ gcc test_dnd_lexer.c dnd_input_reader.o dnd_lexer.o -o test-lex.x86 -Wall -std=gnu11
  ./test-lex.x86 [file to lex]
  */
 int main(int argc, char *argv[]) {
