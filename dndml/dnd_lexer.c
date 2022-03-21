@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 #include "dnd_input_reader.h"
 #include "dnd_lexer.h"
 
@@ -250,4 +251,22 @@ static token_t lexer_get_next_token(lexer_t *this) {
 void construct_lexer(lexer_t *dest, input_reader_t *ir) {
   dest->input_reader = ir; // non-owning; *ir must be initialized already
   dest->get_next_token = &lexer_get_next_token;
+}
+
+int print_token(token_t token) {
+  char *output = malloc(1 + (token.end - token.start));
+  sprintf_token(output, token);
+  int result = printf("%s", output);
+  free(output);
+  return result;
+}
+
+int sprintf_token(char *dest, token_t token) {
+  int result = snprintf(
+    dest,
+    token.end - token.start,
+    "%s",
+    token.src_text + token.start
+  );
+  return result;
 }
