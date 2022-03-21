@@ -8,7 +8,7 @@ elif [ "$1" = "--dndlex" ]; then
   gcc -c dnd_lexer.c -Wall
   gcc test_dnd_lexer.c dnd_lexer.o dnd_input_reader.o -o test-lex.x86 -Wall
 elif [ "$1" = "--clean" ]; then
-  rm test.x86
+  rm test*.x86
   rm *.o
 else
   echo 'usage: ./testbuilder.sh [--dndir|--clean]'
