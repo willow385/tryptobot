@@ -261,7 +261,7 @@ int print_token(token_t token) {
   return result;
 }
 
-int sprintf_token(char *dest, token_t token) {
+int sprint_token(char *dest, token_t token) {
   int result = snprintf(
     dest,
     token.end - token.start,
