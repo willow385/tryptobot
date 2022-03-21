@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
   token_t current_token;
   do {
     current_token = lex.get_next_token(&lex);
-    puts("Token: \"");
+    printf("Token: \"");
     print_token(current_token);
     printf("\"; type: %d\n", current_token.type);
   } while (current_token.type != eof);

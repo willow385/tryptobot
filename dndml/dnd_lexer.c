@@ -254,7 +254,7 @@ void construct_lexer(lexer_t *dest, input_reader_t *ir) {
 }
 
 int print_token(token_t token) {
-  char *output = malloc(1 + (token.end - token.start));
+  char *output = malloc(2 + (token.end - token.start));
   sprint_token(output, token);
   int result = printf("%s", output);
   free(output);
@@ -264,7 +264,7 @@ int print_token(token_t token) {
 int sprint_token(char *dest, token_t token) {
   int result = snprintf(
     dest,
-    token.end - token.start,
+    1 + token.end - token.start,
     "%s",
     token.src_text + token.start
   );
