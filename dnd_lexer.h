@@ -25,6 +25,7 @@ enum token_type {
   item_val = 9,      // %item
   identifier,        // what might come right after @section or @field
 
+  plus_sign,
   colon,
   semicolon,
   open_sqr_bracket,

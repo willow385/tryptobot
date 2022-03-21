@@ -57,7 +57,7 @@
   @field init: %int[2]; ~~ initiative
   @field speed: %string["30ft walking"];
   @field hp: %int [107];
-  @field hitdice: %dice[15d6];
+  @field hitdice: %dice[15d6+0];
   @field deathsaves: %deathsaves[succ:0;fail:0];
 @end-section
 
@@ -74,53 +74,59 @@
   @field attacks: %itemlist[
     %item[
       val: "Basic Attack: One target per Attack action.";
-      qty: NULL
+      qty: NULL;
+      weight: NULL
     ];
     %item[
       val: "Dagger. Melee or Ranged Weapon Attack: +7 to hit, reach 5 ft. 1d4+2 piercing damage. (If thrown, normal range to 20 ft.; disadvantage long range 21 to 60 ft.)";
-      qty: NULL
+      qty: NULL;
+      weight: NULL
     ];
     %item[
       val: "Dagger (offhand as bonus action): As above but only 1d4 piercing damage.";
-      qty: NULL
+      qty: NULL;
+      weight: NULL
     ];
     %item[
       val: "Quarterstaff. Melee Weapon Attack: +5 to hit, reach 5 ft. Hit: 1d6+0 bludgeoning damage. (If used two-handed in melee, does 1d8+0 damage.)";
-      qty: NULL
+      qty: NULL;
+      weight: NULL
     ];
   ];
 
   @field spells: %itemlist[
     %item[
       val: "Ray Of Frost Cantrip. Ranged Spell Attack: +10 to hit, targets one creature or object within 60 ft. range. Hit: 3d8 cold damage and target's speed reduced by 10 feet for one round.";
-      qty: NULL
+      qty: NULL;
+      weight: NULL
     ];
   ];
 @end-section
 
 @section equipment:
   @field gear: %itemlist[
-    %item[val:"dagger";qty:2];
-    %item[val:"quarterstaff";qty:1];
-    %item[val:"belt pouch";qty:1];
-    %item[val:"set of common clothes";qty:1];
-    %item[val:"bottle of black ink";qty:1];
-    %item[val:"quill";qty:1];
-    %item[val:"small knife";qty:1];
-    %item[val:"personal papers";qty:1];
+    ~~ The "weight" attribute measures hectograms. So "weight:5" equals 0.5kg.
+    %item[val:"dagger";qty:2;weight:4];
+    %item[val:"quarterstaff";qty:1;weight:18];
+    %item[val:"belt pouch";qty:1;weight:2];
+    %item[val:"set of common clothes";qty:1;weight:12];
+    %item[val:"bottle of black ink";qty:1;weight:0];
+    %item[val:"quill";qty:1;weight:0];
+    %item[val:"small knife";qty:1;weight:1];
+    %item[val:"personal papers";qty:1;weight:0];
   ];
 
   @field money: %itemlist[
-    %item[val:"gp";qty:5759];
-    %item[val:"sp";qty:37];
-    %item[val:"cp";qty:4];
-    %item[val:"gems";qty:3];
+    %item[val:"gp";qty:5759;weight:NULL];
+    %item[val:"sp";qty:37;weight:NULL];
+    %item[val:"cp";qty:4;weight:NULL];
+    %item[val:"gems";qty:3;weight:NULL];
   ];
 @end-section
 
 @section etc:
   @field alignment: %string["chaotic good"];
-  @field personality-traits: %string["foo bar"];
+  @field personality-traits: %string["high efficiency and minimal runtime"];
   @field ideals: %string["being a valid C identifier"];
   @field bonds: %string["conforming to the ANSI C standard"];
   @field flaws: %string["undefined behavior"];
@@ -129,7 +135,7 @@
 "Human Traits (PHB p. 29)
 o Creature Type: Humanoid
 o Age: 39 years old
-o Medium Size (5' 8\", 146 lbs.)
+o Medium Size (6' 0\", 146 lbs.)
 
 Wizard Class Features (PHB p. 112, TCoE p. 77)
 o Ritual Casting

@@ -24,7 +24,13 @@ static void lex_identifier(lexer_t *lex, token_t *dest) {
 }
 
 static void lex_number(lexer_t *lex, token_t *dest) {
-  
+  dest->type = int_literal;
+  dest->start = lex->input_reader->pos;
+  while (isdigit(lex->input_reader->peek(lex->input_reader))) {
+    lex->input_reader->advance(lex->input_reader);
+  }
+  lex->input_reader->advance(lex->input_reader);
+  dest->end = lex->input_reader->pos;
 }
 
 static void lex_string_literal(lexer_t *lex, token_t *dest) {
@@ -32,11 +38,24 @@ static void lex_string_literal(lexer_t *lex, token_t *dest) {
 }
 
 static void skip_whitespace(lexer_t *lex) {
-  
+  while (lex->input_reader->current_char &&
+         isspace(lex->input_reader->current_char)) {
+    lex->input_reader->advance(lex->input_reader);  
+  }
 }
 
 static void skip_comment(lexer_t *lex) {
-  
+  if (lex->input_reader->current_char == '~') {
+    while (lex->input_reader->current_char != '\r' &&
+           lex->input_reader->current_char != '\n') {
+      lex->input_reader->advance(lex->input_reader);
+    }
+  }
+
+  while (lex->input_reader->current_char == '\r' ||
+         lex->input_reader->current_char == '\n') {
+    lex->input_reader->advance(lex->input_reader);
+  }
 }
 
 /**
@@ -115,6 +134,14 @@ static token_t lexer_get_next_token(lexer_t *this) {
       result.start = this->input_reader->pos;
       result.end = result.start + 1;
       result.type = semicolon;
+      this->input_reader->advance(this->input_reader);
+      return result;
+    }
+
+    if (this->input_reader->current_char == '+') {
+      result.start = this->input_reader->pos;
+      result.end = result.start + 1;
+      result.type = plus_sign;
       this->input_reader->advance(this->input_reader);
       return result;
     }
