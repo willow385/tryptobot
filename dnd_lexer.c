@@ -184,7 +184,7 @@ static token_t lexer_get_next_token(lexer_t *this) {
     }
 
     /* identifiers can start with '_' or a letter
-       and can contain any letters, digits, '_', or '-' */
+       and can contain any letters, '_', or '-' */
     if (this->input_reader->current_char == '_' ||
         isalpha(this->input_reader->current_char)) {
       lex_identifier(this, &result);
