@@ -5,6 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include "jsmn.h"
+#include "dice.h"
 
 // copied from here https://stackoverflow.com/a/19674312
 static unsigned char *utf8_reverse(const unsigned char *str, int size) {
@@ -181,10 +182,6 @@ static command_vec_t *load_commands(void) {
   free(json_string);
   return result;
 }
-
-typedef struct diceroll {
-  int dice_ct, faces, modifier, value;
-} diceroll_t;
 
 static diceroll_t load_last_diceroll(void) {
   char *last_diceroll_str = load_file_to_str("lastroll.txt");
