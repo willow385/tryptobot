@@ -14,8 +14,15 @@ void free_charsheet(charsheet_t *csp) {
         ) {
           free(csp->sections[i].fields[j].itemlist_val.items[k].val);
         }
-        free(csp->sections[i].fields + j);
+        free(csp->sections[i].fields[j].itemlist_val.items);
+      } else if (csp->sections[i].fields[j].type == string_val) {
+        free(csp->sections[i].fields[j].string_val);
       }
+      free(csp->sections[i].fields[j].identifier);
     }
+    free(csp->sections[i].fields);
+    free(csp->sections[i].identifier);
   }
+  free(csp->sections);
+  free(csp);
 }
