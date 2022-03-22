@@ -30,24 +30,31 @@ static enum parser_err parser_consume(
   return parser_syntax_error;
 }
 
+// Prints output to last_parser_err.txt and stderr
 static inline void print_err_message(
   enum parser_err err,
   const char *expected_object
 ) {
+  FILE *f = fopen("last_parser_err.txt", "w+");
   switch (err) {
     case syntax_error:
       fprintf(stderr, "Syntax error: %s expected\n", expected_object);
+      fprintf(f, "Syntax error: %s expected\n", expected_object);
     break;
     case null_ptr_error:
       fprintf(stderr, "Fatal error: unexpected null pointer\n");
+      fprintf(f, "Fatal error: unexpected null pointer\n");
     break;
     case ok:
       fprintf(stderr, "Error: `print_err_message()` was called on `ok`\n");
+      fprintf(f, "Error: `print_err_message()` was called on `ok`\n");
     break;
     default:
       fprintf(stderr, "Error: unknown error code `%d`\n", err);
+      fprintf(f, "Error: unknown error code `%d`\n", err);
     break;
   }
+  fclose(f);
 }
 
 /* This function is assigned in construct_parser() to
@@ -67,14 +74,19 @@ static charsheet_t *parser_parse(parser_t *this) {
     );
     result->sections[result->section_count - 1] = parse_section(this);
     if (result->sections[result->section_count - 1].identifier == NULL) {
-      free(result->sections);
-      result->sections = NULL;
+      free_charsheet(result);
+      result = NULL;
+      return result;
     }
   }
   enum parser_err err = this->consume(this, eof);
   if (err) {
+    free_charsheet(result);
     print_err_message(err, "end of file");
+    result = NULL;
+    return result;
   }
+  return result;
 }
 
 /* The field `.identifier` of this function's return value
