@@ -8,7 +8,31 @@
 #include "dnd_parser.h"
 #include "../dice.h"
 
+#ifdef DEBUG_LVL
+  #if DEBUG_LVL == 0
+    #define DEBUG1(x) ;
+    #define DEBUG2(x) ;
+  #elif DEBUG_LVL == 1
+    #define DEBUG1(x) x;
+    #define DEBUG2(x) ;
+  #elif DEBUG_LVL == 2
+    #define DEBUG1(x) x;
+    #define DEBUG2(x) x;
+  #endif
+#else
+  #warning DEBUG_LVL undefined; defaulting to 0
+  #define DEBUG1(x) ;
+  #define DEBUG2(x) ;
+#endif
+
 static void add_token_to_vec(token_vec_t *dest, token_t token) {
+  DEBUG2(
+    fprintf(stderr, "~~ Inside add_token_to_vec(%p, token).\n", dest);
+    fprintf(stderr, "~~   token:");
+    fprint_token(stderr, token);
+    fprintf(stderr, "; type: %d", token.type);
+    fprintf(stderr, "\n");
+  );
   dest->token_count++;
   dest->tokens = realloc(
     dest->tokens,
@@ -23,6 +47,7 @@ static enum parser_err parser_consume(
   parser_t *this,
   enum token_type type
 ) {
+  DEBUG2(fprintf(stderr, "~~ Consuming token with type %d.\n", type));
   if (this == NULL || this->token_vec.tokens == NULL)
     return null_ptr_error;
   if (this->token_vec.tokens[this->tok_i].type == type) {
@@ -73,20 +98,44 @@ static itemlist_t parse_itemlist_val(parser_t *);
 /* This function is assigned in construct_parser() to
    the parser_t.parse() method. */
 static charsheet_t *parser_parse(parser_t *this) {
+  DEBUG1(fprintf(stderr, "~~ Inside parser_parse(%p).\n", this));
   charsheet_t *result = malloc(sizeof(charsheet_t));
   *result = (charsheet_t){
     .filename = this->src_filename,
     .sections = NULL,
     .section_count = 0
   };
+  DEBUG2(
+    fprintf(stderr, "~~ *result: (charsheet_t){\n");
+    fprintf(stderr, "~~   .filename: %s,\n", result->filename);
+    fprintf(stderr, "~~   .sections: %p,\n", result->sections);
+    fprintf(stderr, "~~   .section_count: %lu\n", result->section_count);
+    fprintf(stderr, "~~ }\n");
+  );
   while (this->token_vec.tokens[this->tok_i].type != eof) {
+    DEBUG2(
+      fprintf(stderr, "~~ Inside while-loop for getting sections.\n");
+      fprintf(
+        stderr,
+        "~~   this->token_vec.tokens[this->tok_i].type: %d\n",
+        this->token_vec.tokens[this->tok_i].type
+      );
+    );
     result->section_count++;
     result->sections = realloc(
       result->sections,
       result->section_count * sizeof(section_t)
     );
     result->sections[result->section_count - 1] = parse_section(this);
+    DEBUG2(fprintf(stderr, "~~ Exited parse_section(%p).\n", this));
     if (result->sections[result->section_count - 1].identifier == NULL) {
+      DEBUG1(
+        fprintf(
+          stderr,
+          "~~ parse_section(%p) returned a section_t with a NULL identifier.\n",
+          this
+        );
+      );
       free_charsheet(result);
       result = NULL;
       return result;
@@ -99,27 +148,44 @@ static charsheet_t *parser_parse(parser_t *this) {
     result = NULL;
     return result;
   }
+  DEBUG2(
+    fprintf(stderr, "~~ *result: (charsheet_t){\n");
+    fprintf(stderr, "~~   .filename: %s,\n", result->filename);
+    fprintf(stderr, "~~   .sections: %p,\n", result->sections);
+    fprintf(stderr, "~~   .section_count: %lu\n", result->section_count);
+    fprintf(stderr, "~~ }\n");
+  );
   return result;
 }
 
-// must have `enum parser_err err`, `parser_t *this`, and `result` in scope
+// TODO pass `err` as a ptr param
+
+// must have `enum parser_err err` and `parser_t *this` in scope
 #define CONSUME_ONE_CHAR(err, type, ptr_to_free_if_err, err_str) \
   err = this->consume(this, type);                               \
   if (err) {                                                     \
     err_message(err, err_str);                                   \
     free(ptr_to_free_if_err);                                    \
-    return result;                                               \
   }
 
 /* The field `.identifier` of this function's return value
    will be NULL in case of error. */
 static section_t parse_section(parser_t *this) {
+  DEBUG1(fprintf(stderr, "~~ Inside parse_section(%p).\n", this));
   enum parser_err err;
   section_t result = {
     .identifier = NULL,
     .fields = NULL,
     .field_count = 0
   };
+
+  DEBUG2(
+    fprintf(stderr, "~~ result: (section_t){\n");
+    fprintf(stderr, "~~   .identifier: %p,\n", result.identifier);
+    fprintf(stderr, "~~   .fields: %p,\n", result.fields);
+    fprintf(stderr, "~~   .field_count: %lu\n", result.field_count);
+    fprintf(stderr, "~~ }\n");
+  );
 
   err = this->consume(this, section);
   if (err) {
@@ -134,6 +200,7 @@ static section_t parse_section(parser_t *this) {
       this->token_vec.tokens[this->tok_i].end
       - this->token_vec.tokens[this->tok_i].start
     );
+    DEBUG2(fprintf(stderr, "~~ Assigning to result.identifier: %s\n", result.identifier));
     this->consume(this, identifier);
   } else {
     err_message(parser_syntax_error, "section identifier");
@@ -151,9 +218,14 @@ static section_t parse_section(parser_t *this) {
       return result;
     }
     field_t curr_field = parse_field(this);
+    DEBUG1(fprintf(stderr, "~~ Exited parse_field(this).\n"));
     if (curr_field.type == syntax_error) {
-      //print_token(this->token_vec.tokens[this->tok_i]);
-      //printf("%s\n", curr_field.string_val);
+      DEBUG1(
+        fprintf(stderr, "~~ curr_field.type == syntax_error is true.\n");
+        fprintf(stderr, "~~ this->token_vec.tokens[this->tok_i]: ");
+        fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+        fprintf(stderr, "~~ curr_field.string_val: %p\n", curr_field.string_val);
+      );
       err_message(parser_syntax_error, "@field");
       exit(1);
       //free(result.fields);
@@ -167,20 +239,47 @@ static section_t parse_section(parser_t *this) {
       result.field_count * sizeof(field_t)
     );
     result.fields[result.field_count - 1] = curr_field;
-    CONSUME_ONE_CHAR(err, semicolon, result.fields, "';'");
+    if (this->token_vec.tokens[this->tok_i].type == end_section) {
+      break;
+    } else {
+      DEBUG1(fprintf(
+        stderr, "~~ Error: expected type %d or %d, got %d\n",
+        semicolon, end_section, this->token_vec.tokens[this->tok_i].type
+      ));
+    }
   }
 
   this->consume(this, end_section);
+  DEBUG2(
+    fprintf(stderr, "~~ result: (section_t){\n");
+    if (result.identifier)
+      fprintf(stderr, "~~   .identifier: %p => %s,\n",
+        result.identifier, result.identifier);
+    else
+      fprintf(stderr, "~~   .identifier: %p,\n", result.identifier);
+    fprintf(stderr, "~~   .fields: %p,\n", result.fields);
+    fprintf(stderr, "~~   .field_count: %lu\n", result.field_count);
+    fprintf(stderr, "~~ }\n");
+  );
   return result;
 }
 
 static field_t parse_field(parser_t *this) {
+  DEBUG1(fprintf(stderr, "~~ Inside parse_field(%p).\n", this));
   enum parser_err err;
   field_t result = {
     .int_val = INT_MIN,
     .identifier = NULL,
     .type = syntax_error
   };
+
+  DEBUG2(
+    fprintf(stderr, "~~ result: (field_t){\n");
+    fprintf(stderr, "~~   .identifier: %p,\n", result.identifier);
+    fprintf(stderr, "~~   .int_val: %d,\n", result.int_val);
+    fprintf(stderr, "~~   .type: %d\n", result.type);
+    fprintf(stderr, "~~ }\n");
+  );
 
   err = this->consume(this, field);
   if (err) {
@@ -195,8 +294,8 @@ static field_t parse_field(parser_t *this) {
       this->token_vec.tokens[this->tok_i].end
       - this->token_vec.tokens[this->tok_i].start
     );
-    printf("identifier address: %p\n", result.identifier);
-    printf("identifier: %s\n", result.identifier);
+    DEBUG2(fprintf(stderr, "~~ identifier address: %p\n", result.identifier));
+    DEBUG2(fprintf(stderr, "~~ identifier: %s\n", result.identifier));
     this->consume(this, identifier);
   } else {
     err_message(parser_syntax_error, "field identifier");
@@ -206,16 +305,17 @@ static field_t parse_field(parser_t *this) {
   CONSUME_ONE_CHAR(err, colon, result.identifier, "':'");
 
   result.type = this->token_vec.tokens[this->tok_i].type;
-  printf("from parse_field(): ");
-  print_token(this->token_vec.tokens[this->tok_i]);
-  printf("\ntype: %d\n", result.type);
+  DEBUG2(fprintf(stderr, "~~ from parse_field(%p): ", this));
+  DEBUG2(fprint_token(stderr, this->token_vec.tokens[this->tok_i]));
+  DEBUG2(fprintf(stderr, "; type: %d\n", result.type));
   switch (result.type) {
     case stat_val:
       result.stat_val = parse_stat_val(this);
     break;
     case string_val:
-      printf("\ntried to parse string\n");
+      DEBUG2(fprintf(stderr, "~~ trying to parse string\n"));
       result.string_val = parse_string_val(this);
+      DEBUG2(fprintf(stderr, "~~ Exited parse_string_val(%p).\n", this));
     break;
     case int_val:
       result.int_val = parse_int_val(this);
@@ -239,8 +339,35 @@ static field_t parse_field(parser_t *this) {
       return result;
   }
 
+  DEBUG2(
+    fprintf(stderr, "~~ result: (field_t){\n");
+    if (result.identifier)
+      fprintf(stderr, "~~   .identifier: %p => %s,\n",
+        result.identifier, result.identifier);
+    else
+      fprintf(stderr, "~~   .identifier: %p,\n", result.identifier);
+    fprintf(stderr, "~~   .int_val: %d,\n", result.int_val);
+    fprintf(stderr, "~~   .type: %d\n", result.type);
+    fprintf(stderr, "~~ }\n");
+  );
+
   err = this->consume(this, semicolon);
   if (err) {
+    DEBUG2(
+      fprintf(stderr, "~~ result: (field_t){\n");
+      fprintf(
+        stderr,
+        "~~   .identifier: %p => \"%s\",\n",
+        result.identifier,
+        result.identifier
+      );
+      if (result.type == string_val && result.string_val != NULL) {
+        fprintf(stderr, "~~   .string_val: %s,\n", result.string_val);
+      }
+      fprintf(stderr, "~~   .int_val: %d,\n", result.int_val);
+      fprintf(stderr, "~~   .type: %d\n", result.type);
+      fprintf(stderr, "~~ }\n");
+    );
     err_message(err, "';'");
     free(result.identifier);
     result.identifier = NULL;
@@ -252,6 +379,21 @@ static field_t parse_field(parser_t *this) {
     return result;
   }
 
+  DEBUG2(
+    fprintf(stderr, "~~ result: (field_t){\n");
+    fprintf(
+      stderr,
+      "~~   .identifier: %p => \"%s\",\n",
+      result.identifier,
+      result.identifier
+    );
+    if (result.type == string_val && result.string_val != NULL) {
+      fprintf(stderr, "~~   .string_val: %s,\n", result.string_val);
+    }
+    fprintf(stderr, "~~   .int_val: %d,\n", result.int_val);
+    fprintf(stderr, "~~   .type: %d\n", result.type);
+    fprintf(stderr, "~~ }\n");
+  );
   return result;
 }
 
@@ -322,6 +464,7 @@ static stat_t parse_stat_val(parser_t *this) {
 }
 
 static char *parse_string_val(parser_t *this) {
+  DEBUG1(fprintf(stderr, "~~ Inside parse_string_val(%p).\n", this));
   enum parser_err err;
   char *result = NULL;
 
@@ -329,7 +472,7 @@ static char *parse_string_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
 
-  if (this->token_vec.tokens[this->tok_i].type == string_val) {
+  if (this->token_vec.tokens[this->tok_i].type == string_literal) {
     // The token will contain quotation marks at the beginning and end,
     // so we allocate _fewer_ chars than what the token points to.
     size_t bufsize = this->token_vec.tokens[this->tok_i].end -
@@ -342,9 +485,52 @@ static char *parse_string_val(parser_t *this) {
       )[i];
     }
     result[bufsize - 1] = '\0';
-  }
+  } else DEBUG2({
+    fprintf(
+      stderr,
+      "~~ Unexpected token of type %d encountered.\n",
+      this->token_vec.tokens[this->tok_i].type
+    );
+    fprintf(stderr, "~~ this->token_vec.tokens[this->tok_i]: ");
+    fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+    fprintf(stderr, "\n");
+  });
 
+  DEBUG2(
+    if (result == NULL) {
+      fprintf(stderr, "~~   result: %p\n", result);
+    } else {
+      fprintf(stderr, "~~   result: %p => %s\n", result, result);
+    }
+  );
+
+  this->consume(this, string_literal);
+
+  DEBUG2(
+    fprintf(stderr, "~~ Current token: ");
+    fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+    fprintf(stderr, "; type: %d\n",
+      this->token_vec.tokens[this->tok_i].type);
+    fprintf(stderr, "~~ Consuming next token...\n");
+  );
   CONSUME_ONE_CHAR(err, close_sqr_bracket, NULL, "']'");
+  DEBUG2(
+    if (err) {
+      fprintf(
+        stderr,
+        "~~ Syntax error: expected type %d, got type %d\n",
+        close_sqr_bracket,
+        this->token_vec.tokens[this->tok_i].type
+      );
+      fprintf(stderr, "~~ Token: ");
+      fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+      printf("\n");
+    }
+    fprintf(stderr, "~~ Current token: ");
+    fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+    fprintf(stderr, "; type: %d\n",
+      this->token_vec.tokens[this->tok_i].type);
+  );
 
   return result;
 }

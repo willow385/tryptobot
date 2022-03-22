@@ -1,1 +1,1 @@
-Syntax error: @section expected
+Syntax error: @end-section expected

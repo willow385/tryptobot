@@ -270,3 +270,11 @@ int sprint_token(char *dest, token_t token) {
   );
   return result;
 }
+
+int fprint_token(FILE *f, token_t token) {
+  char *output = malloc(2 + (token.end - token.start));
+  sprint_token(output, token);
+  int result = fprintf(f, "%s", output);
+  free(output);
+  return result;
+}

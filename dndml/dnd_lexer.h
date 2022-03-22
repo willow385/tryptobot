@@ -57,5 +57,6 @@ void construct_lexer(lexer_t *dest, input_reader_t *ir);
 
 int print_token(token_t token);
 int sprint_token(char *dest, token_t token);
+int fprint_token(FILE *f, token_t token);
 
 #endif // DND_LEXER_H

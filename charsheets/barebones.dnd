@@ -1,0 +1,4 @@
+~~ Simplest valid dndml sheet.
+@section one-field:
+  @field the-field: %string["the field value"];
+@end-section
