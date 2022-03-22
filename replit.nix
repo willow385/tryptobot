@@ -1,6 +1,8 @@
 { pkgs }: {
 	deps = [
 		pkgs.python38Full
+    pkgs.gdb
+    pkgs.vim
 	];
   env = {
     LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
