@@ -116,7 +116,7 @@ static section_t parse_section(parser_t *this) {
 
   while (this->token_vec.tokens[this->tok_i].type != end_section) {
     if (this->token_vec.tokens[this->tok_i].type == eof) {
-      print_err_message(syntax_error, "@end-section");
+      print_err_message(parser_syntax_error, "@end-section");
       free(result.fields);
       free(result.identifier);
       result.identifier = NULL;
@@ -124,7 +124,7 @@ static section_t parse_section(parser_t *this) {
     }
     field_t curr_field = parse_field(this);
     if (curr_field.type == syntax_error) {
-      print_err_message(syntax_error, "@field");
+      print_err_message(parser_syntax_error, "@field");
       free(result.fields);
       free(result.identifier);
       result.identifier = NULL;
