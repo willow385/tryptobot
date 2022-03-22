@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 #include "dnd_input_reader.h"
 #include "dnd_lexer.h"
@@ -90,6 +91,16 @@ static charsheet_t *parser_parse(parser_t *this) {
   return result;
 }
 
+// must have `enum parser_err err`, `parser_t *this`, and `result` in scope
+#define CONSUME_ONE_CHAR(err, type, ptr_to_free_if_err, err_str) \
+  err = this->consume(this, type);                               \
+  if (err) {                                                     \
+    err_message(err, err_str);                                   \
+    free(ptr_to_free_if_err);                                    \
+    ptr_to_free_if_err = NULL;                                   \
+    return result;                                               \
+  }
+
 /* The field `.identifier` of this function's return value
    will be NULL in case of error. */
 static section_t parse_section(parser_t *this) {
@@ -119,13 +130,7 @@ static section_t parse_section(parser_t *this) {
     return result;
   }
 
-  err = this->consume(this, colon);
-  if (err) {
-    err_message(err, "':'");
-    free(result.identifier);
-    result.identifier = NULL;
-    return result;
-  }
+  CONSUME_ONE_CHAR(err, colon, result.identifier, "':'");
 
   while (this->token_vec.tokens[this->tok_i].type != end_section) {
     if (this->token_vec.tokens[this->tok_i].type == eof) {
@@ -182,13 +187,7 @@ static field_t parse_field(parser_t *this) {
     return result;
   }
 
-  err = this->consume(this, colon);
-  if (err) {
-    err_message(err, "':'");
-    free(result.identifier);
-    result.identifier = NULL;
-    return result;
-  }
+  CONSUME_ONE_CHAR(err, colon, result.identifier, "':'");
 
   result.type = this->token_vec.tokens[this->tok_i].type;
   switch (result.type) {
@@ -234,6 +233,66 @@ static field_t parse_field(parser_t *this) {
   }
 
   return result;
+}
+
+static stat_t parse_stat_val(parser_t *this) {
+  enum parser_err err;
+  stat_t result = { .ability = INT_MIN, .mod = INT_MIN };
+
+  this->consume(this, stat_val);
+  err = this->consume(this, open_sqr_bracket);
+  if (err) {
+    err_message(err, "'['");
+    return result;
+  }
+
+  err = this->consume(this, identifier);
+  if (err) {
+    err_message(err, "\"ability\"");
+    return result;
+  }
+
+  CONSUME_ONE_CHAR(err, colon, NULL, "':'");
+
+  if (this->token_vec.tokens[this->tok_i].type == int_val) {
+    this->consume(this, int_val);
+    sscanf(
+      this->token_vec.tokens[this->tok_i].src_text +
+      this->token_vec.tokens[this->tok_i].start,
+      "%d",
+      &result.ability
+    );
+  } else if (this->token_vec.tokens[this->tok_i].type != null_val) {
+    this->consume(this, null_val);
+  } else {
+    err_message(parser_syntax_error, "integer or NULL");
+    return result;
+  }
+  // TODO finish implementation
+}
+
+static char *parse_string_val(parser_t *this) {
+  
+}
+
+static int parse_int_val(parser_t *this) {
+  
+}
+
+static diceroll_t parse_dice_val(parser_t *this) {
+  
+}
+
+static deathsave_t parse_deathsave_val(parser_t *this) {
+  
+}
+
+static item_t parse_item_val(parser *this) {
+  
+}
+
+static itemlist_t parse_itemlist_val(parser_t *this) {
+  
 }
 
 void construct_parser(parser_t *dest, lexer_t *lex, char *src_filename) {

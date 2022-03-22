@@ -5,28 +5,29 @@
 #ifndef DND_CHARSHEET_H
 #define DND_CHARSHEET_H
 
-struct stat { int ability, mod; }; // fields set to INT_MIN if NULL
-struct deathsave { int succ, fail; }; // ditto above
+// fields set to INT_MIN if NULL
+typedef struct stat { int ability, mod; } stat_t;
+typedef struct deathsave { int succ, fail; } deathsave_t;
 
-struct item {
+typedef struct item {
   char *val; // heap-allocated
   int qty, weight; // set to INT_MIN if NULL
-};
+} item_t;
 
-struct itemlist {
-  struct item *items; // heap-allocated
+typedef struct itemlist {
+  item_t *items; // heap-allocated
   size_t item_count;
-};
+} itemlist_t;
 
 typedef struct field {
   union {
-    struct stat stat_val; // %stat
+    stat_t stat_val; // %stat
     char *string_val; // %string (heap-allocated)
     int int_val; // %int (set to INT_MIN if NULL)
     diceroll_t dice_val; // %dice (has `.value` set to INT_MIN if NULL)
-    struct deathsave deathsave_val; // %deathsaves
-    struct itemlist itemlist_val; // %itemlist
-    struct item item_val; // %item
+    deathsave_t deathsave_val; // %deathsaves
+    itemlist_t itemlist_val; // %itemlist
+    item_t item_val; // %item
   };
   char *identifier; // heap-allocated
   enum token_type type;
