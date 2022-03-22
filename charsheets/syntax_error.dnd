@@ -1,0 +1,5 @@
+@section valid-identifier:
+  @field another-valid-identifier: %string["valid value"];
+  @field what-a-well-formed-document: %int[NULL];
+
+~~ SIKE this document is ILL-FORMED!

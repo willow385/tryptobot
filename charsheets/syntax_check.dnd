@@ -1,0 +1,36 @@
+~~ Meaningless "character sheet" designed to check the parser's
+~~ ability to parse dndml syntax.
+
+@section my-beautiful-house:
+  @field my-beautiful-spouse: %string["LJ Heckeroth-Brown-Falzone"];
+  @field how-I-got-here: %string[NULL];
+  @field places-you-may-find-yourself: %itemlist[
+    %item[val:"living in a shotgun shack"; qty:NULL; weight:NULL];
+    %item[val:"another part of the world"; qty:NULL; weight:NULL];
+    %item[
+      val:"behind the wheel of a large automobile";
+      qty:1;
+      weight:10000
+    ];
+    %item[
+      val: "in a beautiful house, with a beautiful spouse";
+      qty: NULL;
+      weight: NULL
+    ];
+  ];
+@end-section
+
+@section I-do-not-like:
+  @field green-eggs: %string["and ham"];
+  @field I-do-not-like-them: %string["Sam-I-am"];
+  @field places-I-would-not-like-them: %itemlist[
+    %item[val:"here";qty:NULL;weight:NULL];
+     %item[val:"there";qty:NULL;weight:NULL];
+   %item[val"anywhere";qty:NULL;weight:NULL];
+  ];
+@end-section
+
+@section __-_uyvIrlgAozsKfCuGYoJUriiRSEC_NxRNcANvDSYl:
+  @field warghl: %int[69]; ~~ nice
+  @field blarghl: %deathsaves[succ:420;fail:-69];
+@end-section

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <climits.h>
 #include "dnd_lexer.h"
 #include "../dice.h"
 

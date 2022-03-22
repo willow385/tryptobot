@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdarg.h>
-#include <climits.h>
+#include <limits.h>
 #include "dnd_lexer.h"
 #include "dnd_charsheet.h"
 #include "../dice.h"

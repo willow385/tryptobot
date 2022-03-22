@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "dnd_input_reader.h"
 #include "dnd_lexer.h"
 #include "dnd_charsheet.h"
@@ -31,7 +32,7 @@ static enum parser_err parser_consume(
 }
 
 // Prints output to last_parser_err.txt and stderr
-static inline void print_err_message(
+static inline void err_message(
   enum parser_err err,
   const char *expected_object
 ) {
@@ -39,19 +40,19 @@ static inline void print_err_message(
   switch (err) {
     case syntax_error:
       fprintf(stderr, "Syntax error: %s expected\n", expected_object);
-      fprintf(f, "Syntax error: %s expected\n", expected_object);
+      fprintf(f, "Syntax error: %s expected", expected_object);
     break;
     case null_ptr_error:
       fprintf(stderr, "Fatal error: unexpected null pointer\n");
-      fprintf(f, "Fatal error: unexpected null pointer\n");
+      fprintf(f, "Fatal error: unexpected null pointer");
     break;
     case ok:
-      fprintf(stderr, "Error: `print_err_message()` was called on `ok`\n");
-      fprintf(f, "Error: `print_err_message()` was called on `ok`\n");
+      fprintf(stderr, "Error: `err_message()` was called on `ok`\n");
+      fprintf(f, "Error: `err_message()` was called on `ok`");
     break;
     default:
       fprintf(stderr, "Error: unknown error code `%d`\n", err);
-      fprintf(f, "Error: unknown error code `%d`\n", err);
+      fprintf(f, "Error: unknown error code `%d`", err);
     break;
   }
   fclose(f);
@@ -82,7 +83,7 @@ static charsheet_t *parser_parse(parser_t *this) {
   enum parser_err err = this->consume(this, eof);
   if (err) {
     free_charsheet(result);
-    print_err_message(err, "end of file");
+    err_message(err, "end of file");
     result = NULL;
     return result;
   }
@@ -101,7 +102,7 @@ static section_t parse_section(parser_t *this) {
 
   err = this->consume(this, section);
   if (err) {
-    print_err_message(err, "@section");
+    err_message(err, "@section");
     return result;
   }
 
@@ -114,13 +115,13 @@ static section_t parse_section(parser_t *this) {
     );
     this->consume(this, identifier);
   } else {
-    print_err_message(parser_syntax_error, "identifier");
+    err_message(parser_syntax_error, "section identifier");
     return result;
   }
 
   err = this->consume(this, colon);
   if (err) {
-    print_err_message(err, "':'");
+    err_message(err, "':'");
     free(result.identifier);
     result.identifier = NULL;
     return result;
@@ -128,7 +129,7 @@ static section_t parse_section(parser_t *this) {
 
   while (this->token_vec.tokens[this->tok_i].type != end_section) {
     if (this->token_vec.tokens[this->tok_i].type == eof) {
-      print_err_message(parser_syntax_error, "@end-section");
+      err_message(parser_syntax_error, "@end-section");
       free(result.fields);
       free(result.identifier);
       result.identifier = NULL;
@@ -136,7 +137,7 @@ static section_t parse_section(parser_t *this) {
     }
     field_t curr_field = parse_field(this);
     if (curr_field.type == syntax_error) {
-      print_err_message(parser_syntax_error, "@field");
+      err_message(parser_syntax_error, "@field");
       free(result.fields);
       free(result.identifier);
       result.identifier = NULL;
@@ -155,7 +156,84 @@ static section_t parse_section(parser_t *this) {
 }
 
 static field_t parse_field(parser_t *this) {
-  // TODO implement
+  enum parser_err err;
+  field_t result = {
+    .int_val = INT_MIN,
+    .identifier = NULL,
+    .type = syntax_error
+  };
+
+  err = this->consume(this, field);
+  if (err) {
+    err_message(err, "@field");
+    return result;
+  }
+
+  if (this->token_vec.tokens[this->tok_i].type == identifier) {
+    result.identifier = strndup(
+      this->token_vec.tokens[this->tok_i].src_text
+      + this->token_vec.tokens[this->tok_i].start,
+      this->token_vec.tokens[this->tok_i].end
+      - this->token_vec.tokens[this->tok_i].start
+    );
+    this->consume(this, identifier);
+  } else {
+    err_message(parser_syntax_error, "field identifier");
+    return result;
+  }
+
+  err = this->consume(this, colon);
+  if (err) {
+    err_message(err, "':'");
+    free(result.identifier);
+    result.identifier = NULL;
+    return result;
+  }
+
+  result.type = this->token_vec.tokens[this->tok_i].type;
+  switch (result.type) {
+    case stat_val:
+      result.stat_val = parse_stat_val(this);
+    break;
+    case string_val:
+      result.stat_val = parse_string_val(this);
+    break;
+    case int_val:
+      result.int_val = parse_int_val(this);
+    break;
+    case dice_val:
+      result.dice_val = parse_dice_val(this);
+    break;
+    case deathsave_val:
+      result.deathsave_val = parse_deathsave_val(this);
+    break;
+    case itemlist_val:
+      result.itemlist_val = parse_itemlist_val(this);
+    break;
+    case item_val:
+      result.item_val = parse_item_val(this);
+    break;
+    default:
+      err_message(parser_syntax_error, "field value");
+      free(result.identifier);
+      result.type = syntax_error;
+      return result;
+  }
+
+  err = this->consume(this, semicolon);
+  if (err) {
+    err_message(err, "';'");
+    free(result.identifier);
+    result.identifier = NULL;
+    if (result.type == string_val) {
+      free(result.string_val);
+    } else if (result.type == itemlist_val) {
+      free(result.itemlist_val.items);
+    }
+    return result;
+  }
+
+  return result;
 }
 
 void construct_parser(parser_t *dest, lexer_t *lex, char *src_filename) {
