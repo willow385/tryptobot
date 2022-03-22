@@ -9,19 +9,19 @@ struct stat { int ability, mod; };
 struct deathsave { int succ, fail; };
 
 struct item {
-  char *val; // heap-allocated
+  char *val;
   int qty, weight;
 };
 
 struct itemlist {
-  struct item *items; // heap-allocated
+  struct item *items;
   size_t item_count;
 };
 
 typedef struct field {
   union {
     struct stat stat_val; // %stat
-    char *string_val; // %string (heap-allocated)
+    char *string_val; // %string
     int int_val; // %int
     diceroll_t dice_val; // %dice
     struct deathsave deathsave_val; // %deathsaves
@@ -34,17 +34,17 @@ typedef struct field {
 
 typedef struct section {
   char *identifier; // heap-allocated
-  field_t *fields; // heap-allocated
+  field_t *fields;
   size_t field_count;
 } section_t;
 
 typedef struct charsheet {
   char *filename;
-  section_t *sections; // heap-allocated
+  section_t *sections;
   size_t section_count;
 } charsheet_t;
 
-// Frees csp and its members. *csp must be on the heap
+// Frees a heap-allocated charsheet_t and its members.
 void free_charsheet(charsheet_t *csp);
 
 #endif // DND_CHARSHEET_H

@@ -53,9 +53,32 @@ static inline void print_err_message(
 /* This function is assigned in construct_parser() to
    the parser_t.parse() method. */
 static charsheet_t *parser_parse(parser_t *this) {
-  // TODO implement
+  charsheet_t *result = malloc(sizeof(charsheet_t));
+  *result = {
+    .filename = this->src_filename,
+    .sections = NULL,
+    .section_count = 0
+  };
+  while (this->token_vec.tokens[this->tok_i].type != eof) {
+    result->section_count++;
+    result->sections = realloc(
+      result->sections,
+      result->section_count * sizeof(section_t)
+    );
+    result->sections[result->section_count - 1] = parse_section(this);
+    if (result->sections[result->section_count - 1].identifier == NULL) {
+      free(result->sections);
+      result->sections = NULL;
+    }
+  }
+  enum parser_err err = this->consume(this, eof);
+  if (err) {
+    print_err_message(err, "end of file");
+  }
 }
 
+/* The field `.identifier` of this function's return value
+   will be NULL in case of error. */
 static section_t parse_section(parser_t *this) {
   enum parser_err err;
   section_t result = {
@@ -86,12 +109,27 @@ static section_t parse_section(parser_t *this) {
   err = this->consume(this, colon);
   if (err) {
     print_err_message(err, "':'");
+    free(result.identifier);
+    result.identifier = NULL;
     return result;
   }
 
   while (this->token_vec.tokens[this->tok_i].type != end_section) {
+    if (this->token_vec.tokens[this->tok_i].type == eof) {
+      print_err_message(syntax_error, "@end-section");
+      free(result.fields);
+      free(result.identifier);
+      result.identifier = NULL;
+      return result;
+    }
     field_t curr_field = parse_field(this);
-    if (curr_field.type == syntax_error) return result;
+    if (curr_field.type == syntax_error) {
+      print_err_message(syntax_error, "@field");
+      free(result.fields);
+      free(result.identifier);
+      result.identifier = NULL;
+      return result;
+    }
     result.field_count++;
     result.fields = realloc(
       result.fields,
