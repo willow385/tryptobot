@@ -33,10 +33,7 @@ async def on_message(message):
     if len(message.content) > 0 and message.content[0] == '%':
       if message.content[1:6] == "bonk ":
         horny_user = message.content[6:]
-        await message.channel.send(
-          f"{horny_user} go to horny jail",
-          file=discord.File("cheems.png")
-        )
+        await message.channel.send(f"{horny_user} go to horny jail", file=discord.File("cheems.png"))
       else:
         result = libtrypto.handle_message(
           ctypes.c_char_p(bytes(message.content, encoding="utf-8"))
