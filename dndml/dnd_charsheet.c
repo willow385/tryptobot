@@ -25,9 +25,10 @@
   #define DEBUG2(x) ;
 #endif
 
-static char global_buf[4096];
+#define global_buf_size 4096
+static char global_buf[global_buf_size];
 
-static char *dstrcat(char *dest, const char *str_to_append) {
+static char *dstrcat(char *dest, const char *str_to_append, ...) {
   DEBUG1(
     fprintf(stderr, "~~ Calling dstrcat(");
     if (dest) {
@@ -55,9 +56,9 @@ static char *dstrcat(char *dest, const char *str_to_append) {
   _Bool should_not_strlen_dest = dest == NULL;
   dest = realloc(dest, bufsize);
   if (should_not_strlen_dest)
-    sprintf(dest, str_to_append);
+    sprintf(dest, "%s", str_to_append);
   else
-    sprintf(dest + strlen(dest), str_to_append);
+    sprintf(dest + strlen(dest), "%s", str_to_append);
 
   DEBUG2(fprintf(stderr, "~~   Result: \"%s\"\n", dest));
   return dest;
@@ -117,11 +118,15 @@ char *charsheet_to_str(charsheet_t *csp) {
           csp->sections[i].fields[j].identifier
         );
       );
-      snprintf() // TODO snprintf to global_buf
-      result = dstrcat(
-        result,
+      snprintf(
+        global_buf,
+        global_buf_size,
         "  @field %s: ",
         csp->sections[i].fields[j].identifier
+      );
+      result = dstrcat(
+        result,
+        global_buf
       );
       switch (csp->sections[i].fields[j].type) {
         case stat_val:
