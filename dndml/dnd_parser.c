@@ -383,7 +383,7 @@ static field_t parse_field(parser_t *this) {
     fprintf(stderr, "~~ result: (field_t){\n");
     fprintf(
       stderr,
-      "~~   .identifier: %p => \"%s\",\n",
+      "~~   .identifier: %p => %s,\n",
       result.identifier,
       result.identifier
     );
