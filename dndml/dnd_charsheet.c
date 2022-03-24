@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdarg.h>
 #include <limits.h>
 #include <string.h>
 #include "dnd_lexer.h"

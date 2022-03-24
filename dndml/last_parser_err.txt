@@ -1,1 +1,1 @@
-Syntax error: ':' expected
+Syntax error: @field expected

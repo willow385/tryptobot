@@ -3,3 +3,4 @@
   @field what-a-well-formed-document: %int[NULL];
 
 ~~ SIKE this document is ILL-FORMED!
+%asdf[-100000000000000000000];

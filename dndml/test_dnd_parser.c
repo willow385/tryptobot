@@ -68,6 +68,11 @@ int main(int argc, char *argv[]) {
 
   charsheet_t *charsheet = parser.parse(&parser);
 
+  if (charsheet == NULL) {
+    printf("parser.parse() returned a NULL object.\n");
+    return 1;
+  }
+
   char *output = charsheet_to_str(charsheet);
 
   if (output != NULL)
