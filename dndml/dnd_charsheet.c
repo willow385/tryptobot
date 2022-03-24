@@ -97,6 +97,7 @@ char *charsheet_to_str(charsheet_t *csp) {
     "~~ Timestamp: %d\n\n",
     timestamp // TODO: this is vulnerable to the 2038 problem
   );
+  result = dstrcat(result, global_buf);
 
   for (int i = 0; i < csp->section_count; i++) {
     DEBUG2(
