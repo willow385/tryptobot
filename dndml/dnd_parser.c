@@ -65,8 +65,16 @@ static inline void err_message(
   FILE *f = fopen("last_parser_err.txt", "w+");
   switch (err) {
     case parser_syntax_error:
-      fprintf(stderr, "Syntax error: %s expected\n", expected_object);
-      fprintf(f, "Syntax error: %s expected", expected_object);
+      fprintf(
+        stderr,
+        "Syntax error: %s expected\n",
+        expected_object
+      );
+      fprintf(
+        f,
+        "Syntax error: %s expected\n",
+        expected_object
+      );
     break;
     case null_ptr_error:
       fprintf(stderr, "Fatal error: unexpected null pointer\n");
@@ -144,7 +152,10 @@ static charsheet_t *parser_parse(parser_t *this) {
   enum parser_err err = this->consume(this, eof);
   if (err) {
     free_charsheet(result);
-    err_message(err, "end of file");
+    err_message(
+      err,
+      "end of file"
+    );
     result = NULL;
     return result;
   }
@@ -164,7 +175,7 @@ static charsheet_t *parser_parse(parser_t *this) {
 #define CONSUME_ONE_CHAR(err, type, ptr_to_free_if_err, err_str) \
   err = this->consume(this, type);                               \
   if (err) {                                                     \
-    err_message(err, err_str);                                   \
+    err_message(err, err_str);        \
     free(ptr_to_free_if_err);                                    \
   }
 
@@ -227,11 +238,10 @@ static section_t parse_section(parser_t *this) {
         fprintf(stderr, "~~ curr_field.string_val: %p\n", curr_field.string_val);
       );
       err_message(parser_syntax_error, "@field");
-      exit(1);
-      //free(result.fields);
-      //free(result.identifier);
-      //result.identifier = NULL;
-      //return result;
+      free(result.fields);
+      free(result.identifier);
+      result.identifier = NULL;
+      return result;
     }
     result.field_count++;
     result.fields = realloc(
@@ -406,7 +416,7 @@ static field_t parse_field(parser_t *this) {
       out_int_ptr                                                    \
     );                                                               \
     this->consume(this, int_literal);                                \
-  } else if (this->token_vec.tokens[this->tok_i].type != null_val) { \
+  } else if (this->token_vec.tokens[this->tok_i].type == null_val) { \
     this->consume(this, null_val);                                   \
   } else {                                                           \
     err_message(parser_syntax_error, "integer or NULL");             \
@@ -485,6 +495,9 @@ static char *parse_string_val(parser_t *this) {
       )[i];
     }
     result[bufsize - 1] = '\0';
+    this->consume(this, string_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == null_val) {
+    this->consume(this, null_val);
   } else DEBUG2({
     fprintf(
       stderr,
@@ -503,8 +516,6 @@ static char *parse_string_val(parser_t *this) {
       fprintf(stderr, "~~   result: %p => %s\n", result, result);
     }
   );
-
-  this->consume(this, string_literal);
 
   DEBUG2(
     fprintf(stderr, "~~ Current token: ");
