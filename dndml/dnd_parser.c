@@ -251,6 +251,8 @@ static section_t parse_section(parser_t *this) {
     result.fields[result.field_count - 1] = curr_field;
     if (this->token_vec.tokens[this->tok_i].type == end_section) {
       break;
+    } else if (this->token_vec.tokens[this->tok_i].type == field) {
+      continue;
     } else {
       DEBUG1(fprintf(
         stderr, "~~ Error: expected type %d or %d, got %d\n",
@@ -361,8 +363,11 @@ static field_t parse_field(parser_t *this) {
     fprintf(stderr, "~~ }\n");
   );
 
-  err = this->consume(this, semicolon);
-  if (err) {
+  if (this->token_vec.tokens[this->tok_i].type == semicolon) {
+    this->consume(this, semicolon);
+  } else if (this->token_vec.tokens[this->tok_i].type != end_section) {
+    err = parser_syntax_error;
+    err_message(err, "';' or @end-section");
     DEBUG2(
       fprintf(stderr, "~~ result: (field_t){\n");
       fprintf(
@@ -378,7 +383,6 @@ static field_t parse_field(parser_t *this) {
       fprintf(stderr, "~~   .type: %d\n", result.type);
       fprintf(stderr, "~~ }\n");
     );
-    err_message(err, "';'");
     free(result.identifier);
     result.identifier = NULL;
     if (result.type == string_val) {
@@ -423,30 +427,32 @@ static field_t parse_field(parser_t *this) {
     return result;                                                   \
   }
 
-#define CONSUME_RESERVED_IDENTIFIER(err, identifier_str) \
-  if (strncmp(                                    \
-    this->token_vec.tokens[this->tok_i].src_text  \
-    + this->token_vec.tokens[this->tok_i].start,  \
-    identifier_str,                               \
+#define CONSUME_RESERVED_IDENTIFIER(err, _str, identifier_str) \
+  _str = strndup(this->token_vec.tokens[this->tok_i].src_text  \
+    + this->token_vec.tokens[this->tok_i].start,\
     this->token_vec.tokens[this->tok_i].end       \
-    - this->token_vec.tokens[this->tok_i].start   \
-  )) {                                            \
+    - this->token_vec.tokens[this->tok_i].start\
+  );\
+  if (strcmp(_str, identifier_str)) {             \
     err = parser_syntax_error;                    \
     err_message(err, identifier_str);           \
-    return result;                                \
+    fprintf(stderr, "Got \"%s\" instead\n", _str);\
+    free(_str);                                \
   } else {                                        \
+    free(_str);\
     err = this->consume(this, identifier);        \
   }
 
 static stat_t parse_stat_val(parser_t *this) {
   enum parser_err err;
   stat_t result = { .ability = INT_MIN, .mod = INT_MIN };
+  char *buf;
 
   this->consume(this, stat_val);
 
   CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "ability");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "ability");
   if (err) {
     err_message(err, "\"ability\"");
     return result;
@@ -458,7 +464,7 @@ static stat_t parse_stat_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "mod");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "mod");
   if (err) {
     err_message(err, "\"mod\"");
     return result;
@@ -569,6 +575,7 @@ static diceroll_t parse_dice_val(parser_t *this) {
     .modifier = INT_MIN,
     .value = INT_MIN
   };
+  char *buf;
 
   this->consume(this, dice_val);
 
@@ -576,7 +583,7 @@ static diceroll_t parse_dice_val(parser_t *this) {
 
   CONSUME_INT_OR_NULL(&result.dice_ct);
 
-  CONSUME_RESERVED_IDENTIFIER(err, "d");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "d");
   if (err) {
     err_message(err, "'d'");
     return result;
@@ -597,12 +604,13 @@ static diceroll_t parse_dice_val(parser_t *this) {
 static deathsave_t parse_deathsave_val(parser_t *this) {
   enum parser_err err;
   deathsave_t result = { .succ = INT_MIN, .fail = INT_MIN };
+  char *buf;
 
   this->consume(this, deathsave_val);
 
   CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "succ");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "succ");
   if (err) {
     err_message(err, "\"succ\"");
     return result;
@@ -614,7 +622,7 @@ static deathsave_t parse_deathsave_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "fail");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "fail");
   if (err) {
     err_message(err, "\"fail\"");
     return result;
@@ -630,18 +638,20 @@ static deathsave_t parse_deathsave_val(parser_t *this) {
 }
 
 static item_t parse_item_val(parser_t *this) {
+  DEBUG2(fprintf(stderr, "~~ Inside parse_item_val(%p).\n", this));
   enum parser_err err;
   item_t result = {
     .val = NULL,
     .qty = INT_MIN,
     .weight = INT_MIN
   };
+  char *buf;
 
   this->consume(this, item_val);
 
   CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "val");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "val");
   if (err) {
     err_message(err, "\"val\"");
     return result;
@@ -649,7 +659,7 @@ static item_t parse_item_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, colon, NULL, "':'");
 
-  if (this->token_vec.tokens[this->tok_i].type == string_val) {
+  if (this->token_vec.tokens[this->tok_i].type == string_literal) {
     size_t bufsize = this->token_vec.tokens[this->tok_i].end -
                      this->token_vec.tokens[this->tok_i].start - 1;
     result.val = malloc(bufsize);
@@ -660,11 +670,17 @@ static item_t parse_item_val(parser_t *this) {
       )[i];
     }
     result.val[bufsize - 1] = '\0';
+    this->consume(this, string_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == null_val) {
+    this->consume(this, null_val);
+  } else {
+    err_message(parser_syntax_error, "string literal or NULL");
+    /* TODO implement more robust error handling */
   }
 
   CONSUME_ONE_CHAR(err, semicolon, result.val, "';'");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "qty");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "qty");
   if (err) {
     err_message(err, "\"qty\"");
     free(result.val);
@@ -678,11 +694,13 @@ static item_t parse_item_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, semicolon, result.val, "';'");
 
-  CONSUME_RESERVED_IDENTIFIER(err, "weight");
+  CONSUME_RESERVED_IDENTIFIER(err, buf, "weight");
   if (err) {
     err_message(err, "\"weight\"");
     free(result.val);
     result.val = NULL;
+    DEBUG2(fprintf(stderr,
+      "~~ Returning from parse_item_val(%p).\n", this));
     return result;
   }
 
@@ -692,10 +710,16 @@ static item_t parse_item_val(parser_t *this) {
 
   CONSUME_ONE_CHAR(err, close_sqr_bracket, result.val, "']'");
 
+  CONSUME_ONE_CHAR(err, semicolon, result.val, "';'");
+
+  DEBUG2(fprintf(stderr,
+    "~~ Returning from parse_item_val(%p).\n", this));
+
   return result;
 }
 
 static itemlist_t parse_itemlist_val(parser_t *this) {
+  DEBUG2(fprintf(stderr, "~~ Inside parse_itemlist_val(%p).\n", this));
   enum parser_err err;
   itemlist_t result = {
     .items = NULL,
@@ -711,6 +735,8 @@ static itemlist_t parse_itemlist_val(parser_t *this) {
       err_message(parser_syntax_error, "']'");
       free(result.items);
       result.item_count = 0;
+      DEBUG2(fprintf(stderr,
+          "~~ Returning from parse_itemlist_val(%p).\n", this));
       return result;
     }
     item_t item = parse_item_val(this);
@@ -719,10 +745,15 @@ static itemlist_t parse_itemlist_val(parser_t *this) {
       result.items, result.item_count * sizeof(item_t)
     );
     result.items[result.item_count - 1] = item;
-    CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
+    if (this->token_vec.tokens[this->tok_i].type == close_sqr_bracket) {
+      break;
+    }
   }
 
   this->consume(this, close_sqr_bracket);
+  CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
+  DEBUG2(fprintf(stderr,
+            "~~ Returning from parse_itemlist_val(%p).\n", this));
   return result;
 }
 

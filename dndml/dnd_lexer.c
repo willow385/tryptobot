@@ -38,8 +38,15 @@ static inline void lex_at_label_or_type_label(lexer_t *lex, token_t *dest) {
   for (enum token_type i = 0; i < reserved_word_count; i++) {
     if (!strncmp(
       dest->src_text + dest->start,
+      "%itemlist",
+      9 // strlen("%itemlist")
+    )) {
+      dest->type = itemlist_val;
+      break;
+    } else if (!strncmp(
+      dest->src_text + dest->start,
       reserved_words[i],
-      dest->end - dest->start
+      strlen(reserved_words[i])
     )) {
       dest->type = i;
       break;

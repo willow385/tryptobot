@@ -216,7 +216,7 @@ char *charsheet_to_str(charsheet_t *csp) {
             k < csp->sections[i].fields[j].itemlist_val.item_count;
             k++
           ) {
-            result = dstrcat(result, "    %%item[val:");
+            result = dstrcat(result, "    %item[val:");
             if (csp->sections[i].fields[j].itemlist_val.items[k].val == NULL) {
               result = dstrcat(result, "NULL;qty:");
             } else {

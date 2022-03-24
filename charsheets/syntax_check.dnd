@@ -3,7 +3,7 @@
 
 @section one-field:
   @field my-amazing-field: %string["the field value"];
-~~  @field my-stuff: %itemlist[%item[val:"lamp";qty:1;weight:20];];
+  @field my-stuff: %itemlist[%item[val:"lamp";qty:1;weight:20];];
 @end-section
 
 @section my-beautiful-house:
