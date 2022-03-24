@@ -176,11 +176,11 @@ char *charsheet_to_str(charsheet_t *csp) {
         case dice_val:
           result = dstrcat(result, "%dice[");
           if (csp->sections[i].fields[j].dice_val.value == INT_MIN) {
-            result = dstrcat(result, "%dice[NULL];\n");
+            result = dstrcat(result, "NULL];\n");
           } else {
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%%dice[%dd%d+%d];\n",
+              "%dd%d+%d];\n",
               csp->sections[i].fields[j].dice_val.dice_ct,
               csp->sections[i].fields[j].dice_val.faces,
               csp->sections[i].fields[j].dice_val.modifier
@@ -237,7 +237,7 @@ char *charsheet_to_str(charsheet_t *csp) {
               );
               result = dstrcat(result, global_buf);
             }
-            if (csp->sections[i].fields[j].itemlist_val.items[k].qty == INT_MIN) {
+            if (csp->sections[i].fields[j].itemlist_val.items[k].weight == INT_MIN) {
               result = dstrcat(result, "NULL];\n");
             } else {
               snprintf(

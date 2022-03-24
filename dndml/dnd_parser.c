@@ -368,6 +368,9 @@ static field_t parse_field(parser_t *this) {
   } else if (this->token_vec.tokens[this->tok_i].type != end_section) {
     err = parser_syntax_error;
     err_message(err, "';' or @end-section");
+    fprintf(stderr, "~~ Got ");
+    fprint_token(stderr, this->token_vec.tokens[this->tok_i]);
+    fprintf(stderr, " instead\n");
     DEBUG2(
       fprintf(stderr, "~~ result: (field_t){\n");
       fprintf(
@@ -751,7 +754,7 @@ static itemlist_t parse_itemlist_val(parser_t *this) {
   }
 
   this->consume(this, close_sqr_bracket);
-  CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
+  // CONSUME_ONE_CHAR(err, semicolon, NULL, "';'");
   DEBUG2(fprintf(stderr,
             "~~ Returning from parse_itemlist_val(%p).\n", this));
   return result;

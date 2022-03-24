@@ -39,9 +39,10 @@ elif [ "$1" = "--clean" ]; then
   echo 'rm *.o'
   rm *.o
 else
-  echo 'usage: ./testbuilder.sh [--dndir|--dndlex|--dndparse|--clean]'
+  echo 'usage: ./build.sh [--dndir|--dndlex|--dndparse|--clean]'
   echo 'options:'
   echo '  --dndir: builds test for dnd_input_reader.{c,h}'
-  echo '  --dndlex: builds text for dnd_lexer.{c,h}'
+  echo '  --dndlex: builds test for dnd_lexer.{c,h}'
+  echo '  --dndparse: builds test for dnd_parser.{c,h}'
   echo '  --clean: removes *.x86 and *.o'
 fi
