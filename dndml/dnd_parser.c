@@ -62,7 +62,7 @@ static inline void err_message(
   enum parser_err err,
   const char *expected_object
 ) {
-  FILE *f = fopen("last_parser_err.txt", "w+");
+  FILE *f = fopen("/home/runner/tryptobot/dndml/errlog.txt", "w+");
   switch (err) {
     case parser_syntax_error:
       fprintf(
@@ -804,10 +804,18 @@ void construct_parser(parser_t *dest, lexer_t *lex, char *src_filename) {
   do {
     current_token = dest->lexer->get_next_token(dest->lexer);
     if (current_token.type == syntax_error) {
+      FILE *log = fopen(
+        "/home/runner/tryptobot/dndml/errlog.txt", "w+"
+      );
       fprintf(
         stderr,
         "Syntax error in token stream generated while parsing.\n"
       );
+      fprintf(
+        log,
+        "Syntax error in token stream generated while parsing.\n"
+      );
+      fclose(log);
       free(dest->token_vec.tokens);
       dest->token_vec.tokens = NULL;
       dest->token_vec.token_count = 0;

@@ -191,7 +191,9 @@ static command_vec_t *load_commands(void) {
 }
 
 static diceroll_t load_last_diceroll(void) {
-  char *last_diceroll_str = load_file_to_str("lastroll.txt");
+  char *last_diceroll_str = load_file_to_str(
+    "/home/runner/tryptobot/lastroll.txt"
+  );
   if (last_diceroll_str) {
     diceroll_t result;
     sscanf(

@@ -48,6 +48,14 @@ char *cmd_dnd(int margc, char *margv[]) {
         "Backend error: dnd_query_charsheet() returned null pointer"
       );
     }
+  } else if (!strcmp(margv[1], "wtf")) {
+    result = strdup("Most recent error:\n");
+    char *err = load_file_to_str("/home/runner/tryptobot/dndml/errlog.txt");
+    if (err != NULL) {
+      result = dstrcat(result, err);
+    } else {
+      result = dstrcat(result, "(unable to load last error)");
+    }
   } else {
     result = strdup("Error: Unsupported subcommand given for `%dnd`.");
   }
@@ -273,7 +281,7 @@ static char *field_to_str(field_t field) {
             result = dstrcat(result, "\n  Weight: ");
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%d", field.itemlist_val.items[i].weight
+              "%.1fkg", ((float)field.itemlist_val.items[i].weight)/10.0f
             );
             result = dstrcat(result, global_buf);
           }
@@ -292,7 +300,7 @@ static char *field_to_str(field_t field) {
       }
       if (field.item_val.weight != INT_MIN) {
         result = dstrcat(result, "\nWeight: ");
-        snprintf(global_buf, GLOBAL_BUF_SIZE, "%d", field.item_val.weight);
+        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1fkg", ((float)field.item_val.weight)/10.0f);
         result = dstrcat(result, global_buf);
       }
     break;

@@ -4,5 +4,4 @@
 __pycache__/
 poetry.lock
 venv/
-mysterious_reminders.json
 setup.sh
