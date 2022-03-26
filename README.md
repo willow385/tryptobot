@@ -12,6 +12,8 @@ the main component of tryptobot's backend. This file implements the majority of 
 
 `./tryptobot.h`: header file which declares the functions `handle_message()` and `load_file_to_str()`.
 
+`./copy_file.{c,h}`: defines function `copy_file()` which copies one file to another without calling `{m,c,re}alloc()`.
+
 `./jsmn.h`: the [jsmn library](https://github.com/zserge/jsmn/blob/master/jsmn.h), a header-only library for tokenizing JSON, written by Serge Zaitsev.
 
 `./commands.json`: a list of the commands supported by tryptobot.
@@ -24,7 +26,7 @@ the main component of tryptobot's backend. This file implements the majority of 
 
 `./dstrcat.h`: headerfile for `./dstrcat.c`.
 
-`./charsheet_utils.{c,h}`: this contains functions for serializing a `charsheet_t` into a human-readable format, including `cmd_dnd()` which is called by `handle_message()` when someone in the Discord server uses the `%dnd` command. It also contains `copy_file()`, which is as of yet unused, but will later be used to store backup copies of character sheets.
+`./charsheet_utils.{c,h}`: this contains functions for serializing a `charsheet_t` into a human-readable format, including `cmd_dnd()` which is called by `handle_message()` when someone in the Discord server uses the `%dnd` command.
 
 `./dndml/`: this directory contains source, header, and object files for working with dndml (DnD Markup Language), most notably for serializing and deserializing character sheets written in dndml (located in `./charsheets/`). In addition to the code for serializing and deserializing dndml, it contains some simple tests for that code, so it can be tested separately from the rest of tryptobot's backend.
 

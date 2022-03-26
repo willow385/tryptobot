@@ -6,6 +6,7 @@ import rebuilder
 from keep_alive import keep_alive
 
 rebuilder.exec("gcc -fPIC -c dstrcat.c -o dstrcat.o -DDEBUG_LVL=0")
+rebuilder.exec("gcc -fPIC -c copy_file.c -o copy_file.o")
 rebuilder.exec("gcc -fPIC -c charsheet_utils.c -o charsheet_utils.o")
 rebuilder.exec(
   "gcc -fPIC -c dndml/dnd_input_reader.c "
@@ -31,6 +32,7 @@ rebuilder.exec(
   "dndml/dnd_charsheet.o "
   "dndml/dnd_parser.o "
   "charsheet_utils.o "
+  "copy_file.o "
   "-o libtryptobot.so"
 )
 print("Recompiled `libtryptobot.so`.")

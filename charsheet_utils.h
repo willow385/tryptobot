@@ -9,6 +9,4 @@ char *dnd_query_charsheet(
 
 char *cmd_dnd(int margc, char *margv[]);
 
-int copy_file(const char *src_path, const char *dest_path);
-
 #endif // CHARSHEET_UTILS_H
