@@ -34,6 +34,11 @@
       "command": "%calcmod",
       "syntax": "%calcmod <ability score>",
       "description": "Calculates the appropriate Modifier for the given Ability score."
+    },
+    {
+      "command": "%dnd",
+      "syntax": "%dnd <subcommand> [args]",
+      "description": "Allows you to use digitally stored DnD character sheets. Currently supported values of <subcommand> are `query` and `wtf`. `query` is used to get data from a character sheet and `wtf` is used to get whatever was the last recorded error message on the backend. The value of [args] is defined by the choice of <subcommand>. For more info, ping the server moderator (Dante)."
     }
   ]
 }
