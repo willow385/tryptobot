@@ -5,7 +5,7 @@
 `./main.py`:
 is run when tryptobot is restarted. This script recompiles the backend into a shared object file (`./libtryptobot.so`), dynamically loads it, connects to the Discord API, handles commands that can't be feasibly implemented in C (i.e., uploading or downloading files), serves a small static webpage, and passes any other commands (the overwhelming majority of commands) to the function `handle_message()` in `./tryptobot.c`.
 
-`./index.html`: a very simple webpage which tryptobot serves while it's running, accessible at (tryptobot.dantefalzone.repl.co)[https://tryptobot.dantefalzone.repl.co].
+`./index.html`: a very simple webpage which tryptobot serves while it's running, accessible at [tryptobot.dantefalzone.repl.co](https://tryptobot.dantefalzone.repl.co/).
 
 `./tryptobot.c`:
 the main component of tryptobot's backend. This file implements the majority of tryptobot's commands, as well as the function `load_file_to_str()` which loads a file's contents into a dynamically allocated string and has proven very useful. TODO: move `load_file_to_str()`'s implementation into its own *.c file.
