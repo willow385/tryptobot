@@ -4,7 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include "tryptobot.h"
 #include "jsmn.h"
+#include "dstrcat.h"
+#include "dndml/dnd_input_reader.h"
+#include "dndml/dnd_charsheet.h"
+#include "dndml/dnd_lexer.h"
+#include "dndml/dnd_parser.h"
+#include "charsheet_utils.h"
 #include "dice.h"
 
 // copied from here https://stackoverflow.com/a/19674312
@@ -115,7 +122,7 @@ static jsmntok_t *json_tokenize(char *json_string, int *token_ct) {
   return tokens;
 }
 
-static char *load_file_to_str(const char *filename) {
+char *load_file_to_str(const char *filename) {
   FILE *f = fopen(filename, "rb");
   char *result;
   if (f) {
@@ -537,6 +544,8 @@ char *handle_message(const char *msg) {
     result = cmd_reroll(margc, margv);
   } else if (!strcmp(margv[0], "%calcmod")) {
     result = cmd_calcmod(margc, margv);
+  } else if (!strcmp(margv[0], "%dnd")) {
+    result = cmd_dnd(margc, margv);
   } else {
     const char *err_msg = "Error: Unrecognized/malformed command `";
     const char *err_msg_end = "`.";

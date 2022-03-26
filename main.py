@@ -5,6 +5,8 @@ import ctypes
 import rebuilder
 from keep_alive import keep_alive
 
+rebuilder.exec("gcc -fPIC -c dstrcat.c -o dstrcat.o -DDEBUG_LVL=0")
+rebuilder.exec("gcc -fPIC -c charsheet_utils.c -o charsheet_utils.o")
 rebuilder.exec(
   "gcc -fPIC -c dndml/dnd_input_reader.c "
   "-o dndml/dnd_input_reader.o"
@@ -23,10 +25,12 @@ rebuilder.exec(
 )
 rebuilder.exec(
   "gcc -fPIC -shared tryptobot.c "
+  "dstrcat.o "
   "dndml/dnd_input_reader.o "
   "dndml/dnd_lexer.o "
   "dndml/dnd_charsheet.o "
   "dndml/dnd_parser.o "
+  "charsheet_utils.o "
   "-o libtryptobot.so"
 )
 print("Recompiled `libtryptobot.so`.")

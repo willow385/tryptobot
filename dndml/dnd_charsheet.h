@@ -40,7 +40,7 @@ typedef struct section {
 } section_t;
 
 typedef struct charsheet {
-  char *filename;
+  char *filename; // not owned by the charsheet_t object
   section_t *sections; // heap-allocated
   size_t section_count;
 } charsheet_t;

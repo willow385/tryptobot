@@ -6,6 +6,7 @@
 #include "dnd_lexer.h"
 #include "dnd_charsheet.h"
 #include "../dice.h"
+#include "../dstrcat.h"
 
 #ifdef DEBUG_LVL
   #if DEBUG_LVL == 0
@@ -26,42 +27,6 @@
 
 #define GLOBAL_BUF_SIZE 2048UL
 static char global_buf[GLOBAL_BUF_SIZE];
-
-static char *dstrcat(char *dest, const char *str_to_append) {
-  DEBUG1(
-    fprintf(stderr, "~~ Calling dstrcat(");
-    if (dest) {
-      fprintf(stderr, "\"%s\", \"%s\").\n", dest, str_to_append);
-    } else {
-      fprintf(stderr, "%p, \"%s\").\n", dest, str_to_append);
-    }
-    fprintf(stderr, "~~ ============== ~~\n");
-  );
-  size_t bufsize;
-  if (dest != NULL)
-    bufsize = 1 + snprintf(NULL, 0, "%s", str_to_append) + strlen(dest);
-  else
-    bufsize = 1 + snprintf(NULL, 0, "%s", str_to_append);
-  DEBUG2(
-    fprintf(
-      stderr, "~~   Allocating %lu chars to dest.\n", bufsize
-    );
-    fprintf(
-      stderr,
-      "~~   strlen(dest): %lu\n",
-      dest == NULL ? 0 : strlen(dest)
-    );
-  );
-  _Bool should_not_strlen_dest = dest == NULL;
-  dest = realloc(dest, bufsize);
-  if (should_not_strlen_dest)
-    sprintf(dest, "%s", str_to_append);
-  else
-    sprintf(dest + strlen(dest), "%s", str_to_append);
-
-  DEBUG2(fprintf(stderr, "~~   Result: \"%s\"\n", dest));
-  return dest;
-}
 
 void free_charsheet(charsheet_t *csp) {
   for (int i = 0; i < csp->section_count; i++) {
