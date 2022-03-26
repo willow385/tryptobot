@@ -148,7 +148,9 @@ char *load_file_to_str(const char *filename) {
 }
 
 static command_vec_t *load_commands(void) {
-  char *json_string = load_file_to_str("commands.json");
+  char *json_string = load_file_to_str(
+    "/home/runner/tryptobot/commands.json"
+  );
 
   int token_ct;
   jsmntok_t *tokens = json_tokenize(json_string, &token_ct);
@@ -209,7 +211,7 @@ static diceroll_t load_last_diceroll(void) {
 }
 
 static void save_diceroll(diceroll_t diceroll) {
-  FILE *f = fopen("lastroll.txt", "w+");
+  FILE *f = fopen("/home/runner/tryptobot/lastroll.txt", "w+");
   if (f) {
     fprintf(
       f, "dice:%dd%d+%d;val:%d;",
