@@ -1,7 +1,7 @@
-#include <stdio.h>
-
 #ifndef DND_INPUT_READER_H
 #define DND_INPUT_READER_H
+
+#include <stdio.h>
 
 typedef struct input_reader {
   const char *text; // text to be parsed

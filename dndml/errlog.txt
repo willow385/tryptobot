@@ -1,1 +1,1 @@
-Syntax error in token stream generated while parsing.
+Syntax error: "val" expected

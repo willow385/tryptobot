@@ -1,9 +1,10 @@
+#ifndef DND_PARSER_H
+#define DND_PARSER_H
+
+#include <math.h>
 #include "dnd_input_reader.h"
 #include "dnd_lexer.h"
 #include "dnd_charsheet.h"
-
-#ifndef DND_PARSER_H
-#define DND_PARSER_H
 
 enum parser_err { ok = 0, parser_syntax_error, null_ptr_error };
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <limits.h>
 #include "dnd_input_reader.h"
@@ -98,6 +99,7 @@ static field_t parse_field(parser_t *, enum parser_err *);
 static stat_t parse_stat_val(parser_t *, enum parser_err *);
 static char *parse_string_val(parser_t *, enum parser_err *);
 static int parse_int_val(parser_t *, enum parser_err *);
+static float parse_float_val(parser_t *, enum parser_err *);
 static diceroll_t parse_dice_val(parser_t *, enum parser_err *);
 static deathsave_t parse_deathsave_val(parser_t *, enum parser_err *);
 static item_t parse_item_val(parser_t *, enum parser_err *);
@@ -353,6 +355,9 @@ static field_t parse_field(parser_t *this, enum parser_err *err) {
     case int_val:
       result.int_val = parse_int_val(this, err);
     break;
+    case float_val:
+      result.float_val = parse_float_val(this, err);
+    break;
     case dice_val:
       result.dice_val = parse_dice_val(this, err);
     break;
@@ -368,6 +373,7 @@ static field_t parse_field(parser_t *this, enum parser_err *err) {
     default:
       *err = parser_syntax_error;
       err_message(*err, "field value");
+      this->consume(this, syntax_error);
     break;
   }
 
@@ -481,14 +487,17 @@ static stat_t parse_stat_val(parser_t *this, enum parser_err *err) {
   *err = this->consume(this, stat_val);
 
   CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
+  if (*err) this->consume(this, syntax_error);
 
   CONSUME_RESERVED_IDENTIFIER(err, buf, "ability");
   if (*err) {
     err_message(*err, "\"ability\"");
+    this->consume(this, syntax_error);
     return result;
   }
 
   CONSUME_ONE_CHAR(err, colon, NULL, "':'");
+  if (*err) this->consume(this, syntax_error);
 
   CONSUME_INT_OR_NULL(&result.ability);
 
@@ -600,6 +609,44 @@ static int parse_int_val(parser_t *this, enum parser_err *err) {
   return result;
 }
 
+static float parse_float_val(parser_t *this, enum parser_err *err) {
+  float result = NAN;
+  int intval;
+
+  this->consume(this, float_val);
+
+  CONSUME_ONE_CHAR(err, open_sqr_bracket, NULL, "'['");
+
+  if (this->token_vec.tokens[this->tok_i].type == float_literal) {
+    sscanf(
+      this->token_vec.tokens[this->tok_i].src_text +
+      this->token_vec.tokens[this->tok_i].start,
+      "%f",
+      &result
+    );
+    this->consume(this, float_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == int_literal) {
+    sscanf(
+      this->token_vec.tokens[this->tok_i].src_text +
+      this->token_vec.tokens[this->tok_i].start,
+      "%d",
+      &intval
+    );
+    result = intval;
+    this->consume(this, int_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == null_val) {
+    this->consume(this, null_val);
+  } else {
+    *err = parser_syntax_error;
+    err_message(*err, "float or NULL");
+    return result;
+  }
+
+  CONSUME_ONE_CHAR(err, close_sqr_bracket, NULL, "']'");
+
+  return result;  
+}
+
 static diceroll_t parse_dice_val(parser_t *this, enum parser_err *err) {
   diceroll_t result = {
     .dice_ct = INT_MIN,
@@ -704,8 +751,9 @@ static item_t parse_item_val(parser_t *this, enum parser_err *err) {
   } else if (this->token_vec.tokens[this->tok_i].type == null_val) {
     this->consume(this, null_val);
   } else {
-    err_message(parser_syntax_error, "string literal or NULL");
-    /* TODO implement more robust error handling */
+    *err = parser_syntax_error;
+    err_message(*err, "string literal or NULL");
+    return result;
   }
 
   CONSUME_ONE_CHAR(err, semicolon, result.val, "';'");
@@ -736,11 +784,34 @@ static item_t parse_item_val(parser_t *this, enum parser_err *err) {
 
   CONSUME_ONE_CHAR(err, colon, result.val, "':'");
 
-  CONSUME_INT_OR_NULL(&result.weight);
+  if (this->token_vec.tokens[this->tok_i].type == float_literal) {
+    sscanf(
+      this->token_vec.tokens[this->tok_i].src_text +
+      this->token_vec.tokens[this->tok_i].start,
+      "%f",
+      &result.weight
+    );
+    this->consume(this, float_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == int_literal) {
+    int intval;
+    sscanf(
+      this->token_vec.tokens[this->tok_i].src_text +
+      this->token_vec.tokens[this->tok_i].start,
+      "%d",
+      &intval
+    );
+    result.weight = intval;
+    this->consume(this, int_literal);
+  } else if (this->token_vec.tokens[this->tok_i].type == null_val) {
+    result.weight = NAN;
+    this->consume(this, null_val);
+  } else {
+    *err = parser_syntax_error;
+    err_message(*err, "float or NULL");
+    return result;
+  }
 
   CONSUME_ONE_CHAR(err, close_sqr_bracket, result.val, "']'");
-
-  CONSUME_ONE_CHAR(err, semicolon, result.val, "';'");
 
   DEBUG2(fprintf(stderr,
     "~~ Returning from parse_item_val(%p).\n", this));
@@ -777,6 +848,8 @@ static itemlist_t parse_itemlist_val(parser_t *this, enum parser_err *err) {
     result.items[result.item_count - 1] = item;
     if (this->token_vec.tokens[this->tok_i].type == close_sqr_bracket) {
       break;
+    } else {
+      CONSUME_ONE_CHAR(err, semicolon, result.items, "';'");
     }
   }
 

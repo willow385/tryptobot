@@ -12,6 +12,7 @@ const char *reserved_words[] = {
   "%stat",
   "%string",
   "%int",
+  "%float",
   "%dice",
   "%deathsaves",
   "%itemlist",
@@ -19,7 +20,7 @@ const char *reserved_words[] = {
   "NULL"
 };
 
-size_t reserved_word_count = 11;
+size_t reserved_word_count = 12;
 
 static inline void lex_at_label_or_type_label(lexer_t *lex, token_t *dest) {
   dest->start = lex->input_reader->pos;
@@ -89,18 +90,20 @@ static void lex_identifier(lexer_t *lex, token_t *dest) {
   }
 }
 
-static void lex_decimal_point(lexer_t *lex, token_t *dest) {
-  dest->type = decimal_point;
-  dest->start = lex->input_reader->pos;
-  lex->input_reader->advance(lex->input_reader);
-  dest->end = lex->input_reader->pos;
-}
-
 static void lex_number(lexer_t *lex, token_t *dest) {
   dest->type = int_literal;
   dest->start = lex->input_reader->pos;
-  while (isdigit(lex->input_reader->peek(lex->input_reader))) {
+  int is_not_a_valid_float_literal = -1;
+  while (isdigit(lex->input_reader->peek(lex->input_reader)) ||
+         lex->input_reader->peek(lex->input_reader) == '.') {
+    if (lex->input_reader->peek(lex->input_reader) == '.') {
+      is_not_a_valid_float_literal++;
+      dest->type = float_literal;
+    }
     lex->input_reader->advance(lex->input_reader);
+  }
+  if (dest->type == float_literal && is_not_a_valid_float_literal) {
+    dest->type = syntax_error;
   }
   lex->input_reader->advance(lex->input_reader);
   dest->end = lex->input_reader->pos;
@@ -176,13 +179,9 @@ static token_t lexer_get_next_token(lexer_t *this) {
       return this->get_next_token(this);
     }
 
-    if (this->input_reader->current_char == '.') {
-      lex_decimal_point(this, &result);
-      return result;
-    }
-
     if (isdigit(this->input_reader->current_char) ||
-        this->input_reader->current_char == '-') {
+        this->input_reader->current_char == '-'   ||
+        this->input_reader->current_char == '.') {
       lex_number(this, &result);
       return result;
     }

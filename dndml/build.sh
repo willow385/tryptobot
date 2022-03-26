@@ -26,12 +26,14 @@ elif [ "$1" == "--dndparse" ]; then
   dnd_lexer.o         \
   dnd_charsheet.o     \
   dnd_parser.o        \
+  ../dstrcat.o        \
   -o test-parser.x86 -Wall -std=gnu11 -g -fvar-tracking"
   gcc test_dnd_parser.c \
   dnd_input_reader.o  \
   dnd_lexer.o         \
   dnd_charsheet.o     \
   dnd_parser.o        \
+  ../dstrcat.o        \
   -o test-parser.x86 -Wall -std=gnu11 -g -fvar-tracking
 elif [ "$1" = "--clean" ]; then
   echo 'rm test*.x86'

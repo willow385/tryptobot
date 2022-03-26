@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include <limits.h>
 #include <string.h>
@@ -201,12 +202,12 @@ char *charsheet_to_str(charsheet_t *csp) {
               );
               result = dstrcat(result, global_buf);
             }
-            if (csp->sections[i].fields[j].itemlist_val.items[k].weight == INT_MIN) {
+            if (isnan(csp->sections[i].fields[j].itemlist_val.items[k].weight)) {
               result = dstrcat(result, "NULL];\n");
             } else {
               snprintf(
                 global_buf, GLOBAL_BUF_SIZE,
-                "%d];\n",
+                "%.2f];\n",
                 csp->sections[i].fields[j].itemlist_val.items[k].weight
               );
               result = dstrcat(result, global_buf);
@@ -236,12 +237,12 @@ char *charsheet_to_str(charsheet_t *csp) {
             );
             result = dstrcat(result, global_buf);
           }
-          if (csp->sections[i].fields[j].item_val.qty == INT_MIN) {
+          if (isnan(csp->sections[i].fields[j].item_val.weight)) {
             result = dstrcat(result, "NULL];\n");
           } else {
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%d];\n",
+              "%.2f];\n",
               csp->sections[i].fields[j].item_val.weight
             );
             result = dstrcat(result, global_buf);

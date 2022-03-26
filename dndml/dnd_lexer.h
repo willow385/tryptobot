@@ -1,7 +1,7 @@
-#include "dnd_input_reader.h"
-
 #ifndef DND_LEXER_H
 #define DND_LEXER_H
+
+#include "dnd_input_reader.h"
 
 enum token_type {
   eof = -1,
@@ -19,11 +19,12 @@ enum token_type {
   stat_val = 3,      // %stat
   string_val = 4,    // %string
   int_val = 5,       // %int
-  dice_val = 6,      // %dice
-  deathsave_val = 7, // %deathsaves
-  itemlist_val = 8,  // %itemlist
-  item_val = 9,      // %item
-  null_val = 10,     // NULL
+  float_val = 6,     // %float
+  dice_val = 7,      // %dice
+  deathsave_val = 8, // %deathsaves
+  itemlist_val = 9,  // %itemlist
+  item_val = 10,      // %item
+  null_val = 11,     // NULL
   identifier,        // what might come right after @section or @field
 
   plus_sign,
@@ -33,7 +34,7 @@ enum token_type {
   close_sqr_bracket,
   int_literal,
   string_literal,
-  decimal_point,
+  float_literal,
 
   syntax_error
 };

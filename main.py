@@ -33,7 +33,7 @@ rebuilder.exec(
   "dndml/dnd_parser.o "
   "charsheet_utils.o "
   "copy_file.o "
-  "-o libtryptobot.so"
+  "-o libtryptobot.so -lm"
 )
 print("Recompiled `libtryptobot.so`.")
 libc = ctypes.CDLL("libc.so.6")

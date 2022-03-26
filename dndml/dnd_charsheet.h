@@ -1,9 +1,10 @@
-#include <stdio.h>
-#include "dnd_lexer.h"
-#include "../dice.h"
-
 #ifndef DND_CHARSHEET_H
 #define DND_CHARSHEET_H
+
+#include <stdio.h>
+#include <math.h>
+#include "dnd_lexer.h"
+#include "../dice.h"
 
 // fields set to INT_MIN if NULL
 typedef struct stat { int ability, mod; } stat_t;
@@ -11,7 +12,8 @@ typedef struct deathsave { int succ, fail; } deathsave_t;
 
 typedef struct item {
   char *val; // heap-allocated
-  int qty, weight; // set to INT_MIN if NULL
+  int qty; // set to INT_MIN if NULL
+  float weight; // set to NAN if NULL
 } item_t;
 
 typedef struct itemlist {
@@ -24,6 +26,7 @@ typedef struct field {
     stat_t stat_val; // %stat
     char *string_val; // %string (heap-allocated)
     int int_val; // %int (set to INT_MIN if NULL)
+    float float_val; // %float (set to NAN if NULL)
     diceroll_t dice_val; // %dice (has `.value` set to INT_MIN if NULL)
     deathsave_t deathsave_val; // %deathsaves
     itemlist_t itemlist_val; // %itemlist
