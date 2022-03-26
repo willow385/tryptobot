@@ -22,7 +22,8 @@ char *cmd_dnd(int margc, char *margv[]) {
     return strdup(
       "No subcommand given.\n"
       "Supported subcommands:\n"
-      "`%dnd query`"
+      "`%dnd query`\n"
+      "`%dnd wtf`"
     );
   }
 
