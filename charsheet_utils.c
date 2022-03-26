@@ -98,6 +98,7 @@ char *dnd_query_charsheet(
   }
 
   char *result = NULL;
+  // I use `goto` here and I'm not sorry
   if (section_id != NULL) {
     for (int i = 0; i < charsheet->section_count; i++) {
       if (!strcmp(charsheet->sections[i].identifier, section_id)) {
