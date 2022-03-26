@@ -1,0 +1,89 @@
+~~ This is an empty character sheet.
+@section ability:
+  @field str: %stat[ability:NULL; mod:NULL];
+  @field dex: %stat[ability:NULL; mod:NULL];
+  @field con: %stat[ability:NULL; mod:NULL];
+  @field int: %stat[ability:NULL; mod:NULL];
+  @field wis: %stat[ability:NULL; mod:NULL];
+  @field cha: %stat[ability:NULL;  mod:NULL];
+@end-section
+
+@section header-stats:
+  @field name:  %string[NULL];
+  @field class: %string[NULL];
+  @field race:  %string[NULL];
+  @field level: %int[NULL];
+  @field background: %string[NULL];
+  @field xp: %int[NULL];
+@end-section
+
+@section skills:
+  @field acrobatics: %int[NULL];
+  @field animal-handling: %int[NULL];
+  @field arcana: %int[NULL];
+  @field athletics: %int[NULL];
+  @field deception: %int[NULL];
+  @field history: %int[NULL];
+  @field insight: %int[NULL];
+  @field intimidation: %int[NULL];
+  @field investigation: %int[NULL];
+  @field medicine: %int[NULL];
+  @field nature: %int[NULL];
+  @field perception: %int[NULL];
+  @field performance: %int[NULL];
+  @field persuasion: %int[NULL];
+  @field religion: %int[NULL];
+  @field sleight-of-hand: %int[NULL];
+  @field stealth: %int[NULL];
+  @field survival: %int[NULL];
+@end-section
+
+@section saving-throws:
+  @field str: %int[NULL];
+  @field dex: %int[NULL];
+  @field con: %int[NULL];
+  @field int: %int[NULL];
+  @field wis: %int[NULL];
+  @field cha: %int[NULL];
+@end-section
+
+@section personal-stats:
+  @field ac: %int[NULL];
+  @field init: %int[NULL]; ~~ initiative
+  @field speed: %string[NULL];
+  @field hp: %int[NULL];
+  @field hitdice: %dice[NULL];
+  @field deathsaves: %deathsaves[succ:0; fail:0];
+@end-section
+
+@section proficiencies-and-languages:
+  @field armor:     %string[NULL];
+  @field weapons:   %string[NULL];
+  @field tools:     %string[NULL];
+  @field saving-throws: %string[NULL];
+  @field skills:    %string[NULL];
+  @field languages: %string[NULL];
+@end-section
+
+@section attacks-and-spells:
+  @field attacks: %itemlist[];
+  @field spells: %itemlist[];
+@end-section
+
+@section equipment:
+  @field gear: %itemlist[];
+  @field money: %itemlist[];
+@end-section
+
+@section etc:
+  @field alignment: %string[NULL];
+  @field personality-traits: %string[NULL];
+  @field ideals: %string[NULL];
+  @field bonds: %string[NULL];
+  @field flaws: %string[NULL];
+
+  @field features-and-traits: %string[];
+
+  @field other: %string[NULL];
+
+@end-section

@@ -89,6 +89,13 @@ static void lex_identifier(lexer_t *lex, token_t *dest) {
   }
 }
 
+static void lex_decimal_point(lexer_t *lex, token_t *dest) {
+  dest->type = decimal_point;
+  dest->start = lex->input_reader->pos;
+  lex->input_reader->advance(lex->input_reader);
+  dest->end = lex->input_reader->pos;
+}
+
 static void lex_number(lexer_t *lex, token_t *dest) {
   dest->type = int_literal;
   dest->start = lex->input_reader->pos;
@@ -167,6 +174,11 @@ static token_t lexer_get_next_token(lexer_t *this) {
     if (isspace(this->input_reader->current_char)) {
       skip_whitespace(this);
       return this->get_next_token(this);
+    }
+
+    if (this->input_reader->current_char == '.') {
+      lex_decimal_point(this, &result);
+      return result;
     }
 
     if (isdigit(this->input_reader->current_char) ||

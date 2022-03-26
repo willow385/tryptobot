@@ -33,6 +33,7 @@ enum token_type {
   close_sqr_bracket,
   int_literal,
   string_literal,
+  decimal_point,
 
   syntax_error
 };

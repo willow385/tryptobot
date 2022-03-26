@@ -1,4 +1,5 @@
 ~~ Simplest valid dndml sheet.
 @section the-section:
-  @field the-field: %string["the field value"];
+  ~~ @field the-field: %string["the field value"];
+  @field an-item: %item[val:NULL;qty:NULL;weight:1.7];
 @end-section
