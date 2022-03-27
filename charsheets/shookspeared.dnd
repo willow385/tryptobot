@@ -132,7 +132,7 @@ Peerless Skill"
 @end-section
 
 @section equipment:
-  @field gear: %itemlist[
+  @field inventory: %itemlist[
     %item[val:"Letter of Introduction from Performer's Guild";qty:1;weight:NULL];
     %item[val:"Crossbow";qty:1;weight:23];
     %item[val:"Backpack";qty:1;weight:23];

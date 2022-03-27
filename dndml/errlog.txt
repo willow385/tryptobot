@@ -1,1 +1,1 @@
-Syntax error: "val" expected
+Syntax error: "qty" expected

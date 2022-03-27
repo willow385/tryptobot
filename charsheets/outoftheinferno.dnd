@@ -123,23 +123,46 @@
 @end-section
 
 @section equipment:
-  @field gear: %itemlist[
+  @field inventory: %itemlist[
     ~~ The "weight" attribute measures pounds. So "weight:5.5" equals 5.5 lb.
-    %item[val:"dagger";qty:2;weight:4];
-    %item[val:"quarterstaff";qty:1;weight:18];
-    %item[val:"belt pouch";qty:1;weight:2];
-    %item[val:"set of common clothes";qty:1;weight:12];
-    %item[val:"bottle of black ink";qty:1;weight:NULL];
-    %item[val:"quill";qty:1;weight:NULL];
-    %item[val:"small knife";qty:1;weight:1];
-    %item[val:"personal papers";qty:1;weight:NULL];
+    %item[val:"Sling";qty:1;weight:NULL];
+    %item[val:"Sling Bullet";qty:40;weight:0.08];
+    %item[val:"Quarterstaff";qty:1;weight:4.0];
+    %item[val:"Belt Pouch";qty:1;weight:1.0];
+    %item[val:"Robe of Scintillating Colors";qty:1;weight:6.0];
+    %item[val:"Sling"]
+    %item[
+      val: "Bag of Holding (`%dnd query outoftheinferno equipment bag-of-holding` to see contents)";
+      qty:1;
+      weight:15.0
+    ];
+  ];
+
+  @field bag-of-holding: %itemlist[
+    %item[val:"Sling Bullet";qty:100;weight:0.08];
+    %item[val:"Spellbook";qty:1;weight:3.0];
+    %item[val:"Blank Book";qty:2;weight:5.0];
+    %item[val:"Component Pouch";qty:1;weight:2.0];
+    %item[val:"Waterskin";qty:1;weight:5.0];
+    %item[val:"One Day's Rations";qty:4;weight:2.0];
+    %item[val:"Set of Common Clothes";qty:1;weight:3.0];
+    %item[val:"Bottle of Black Ink";qty:2;weight:NULL];
+    %item[val:"Quill";qty:1;weight:NULL];
+    %item[val:"Small Knife";qty:1;weight:0.25];
+    %item[val:"Personal Papers";qty:1;weight:NULL];
+    %item[val:"50 feet of Hemp Rope";qty:1;weight:10.0];
+    %item[val:"Blanket";qty:1;weight:3.0];
+    %item[val:"Crowbar";qty:1;weight:5.0];
+    %item[val:"Hammer";qty:1;weight:3.0];
+    %item[val:"Sledgehammer";qty:1;weight:10.0];
+    %item[val:"Bedroll";qty:1;weight:7.0];
   ];
 
   @field money: %itemlist[
-    %item[val:"gp";qty:5759;weight:NULL];
-    %item[val:"sp";qty:37;weight:NULL];
-    %item[val:"cp";qty:4;weight:NULL];
-    %item[val:"gems";qty:3;weight:NULL];
+    %item[val:"gp";qty:6214;weight:NULL];
+    %item[val:"sp";qty:8;weight:NULL];
+    %item[val:"cp";qty:2;weight:NULL];
+    %item[val:"gems";qty:0;weight:NULL];
   ];
 @end-section
 
@@ -151,18 +174,21 @@
   @field flaws: %string["undefined behavior"];
 
   @field features-and-traits: %string[
-"Human Traits (PHB p. 29)
+"Human Traits
 o Creature Type: Humanoid
-o Age: 39 years old
+o Age: 49 years old
 o Medium Size (6' 0\", 146 lbs.)
 
 Wizard Class Features
 o School of Conjuration
-  Conjuration 7
+  Conjuration Savant
   Minor conjuration
 o Spell casting
 o Ritual casting
-o Arcane Recovery"
+o Arcane Recovery
+o Benign Transposition
+o Focus Conjuration
+o Durable Summons"
   ];
 
   @field other: %string["Put anything you want here."];

@@ -191,8 +191,18 @@ end_of_loop:
 static char *get_field_list_from_section(section_t section) {
   char *result = NULL;
   for (int i = 0; i < section.field_count; i++) {
-    snprintf(global_buf, GLOBAL_BUF_SIZE, "**%s**\n", section.fields[i].identifier);
+    char *field_as_str = field_to_str(section.fields[i]);
+    snprintf(
+      global_buf,
+      GLOBAL_BUF_SIZE,
+      "**%s**: %s\n",
+      section.fields[i].identifier,
+      field_as_str
+    );
     result = dstrcat(result, global_buf);
+    free(field_as_str);
+    if (section.fields[i].type == itemlist_val)
+      result = dstrcat(result, "\n");
   }
   return result;
 }
@@ -287,7 +297,7 @@ static char *field_to_str(field_t field) {
             result = dstrcat(result, "\n  Weight: ");
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%.1f lb", field.itemlist_val.items[i].weight
+              "%.2f lb", field.itemlist_val.items[i].weight
             );
             result = dstrcat(result, global_buf);
           }
@@ -306,7 +316,7 @@ static char *field_to_str(field_t field) {
       }
       if (!isnan(field.item_val.weight)) {
         result = dstrcat(result, "\nWeight: ");
-        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1f lb", field.item_val.weight);
+        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.2f lb", field.item_val.weight);
         result = dstrcat(result, global_buf);
       }
     break;

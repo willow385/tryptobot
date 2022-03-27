@@ -71,7 +71,7 @@
 @end-section
 
 @section equipment:
-  @field gear: %itemlist[];
+  @field inventory: %itemlist[];
   @field money: %itemlist[];
 @end-section
 
