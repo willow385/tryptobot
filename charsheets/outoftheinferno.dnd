@@ -96,10 +96,29 @@
 
   @field spells: %itemlist[
     %item[
-      val: "Ray Of Frost Cantrip. Ranged Spell Attack: +10 to hit, targets one creature or object within 60 ft. range. Hit: 3d8 cold damage and target's speed reduced by 10 feet for one round.";
+      val: "Ray Of Frost Cantrip";
       qty: NULL;
       weight: NULL
     ];
+    %item[val:"Empty Cantrip";qty:NULL;weight:NULL];
+    %item[val:"Empty Cantrip";qty:NULL;weight:NULL];
+    %item[val:"Empty Cantrip";qty:NULL;weight:NULL];
+    %item[val:"Empty Cantrip";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty First-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Eighth-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Eighth-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Seventh-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Seventh-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Seventh-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Seventh-Level Spell";qty:NULL;weight:NULL];
+    %item[val:"Empty Sixth-Level Spell";qty:NULL;weight:NULL];
   ];
 @end-section
 
@@ -137,13 +156,13 @@ o Creature Type: Humanoid
 o Age: 39 years old
 o Medium Size (6' 0\", 146 lbs.)
 
-Wizard Class Features (PHB p. 112, TCoE p. 77)
-o Ritual Casting
-o Arcane Recovery (regain spell slots totalling 8 levels [max. 6th level] after short rest once per day)
-o Wizardly Quill (automated pen)
-o Awakened Spellbook (spellcasting focus, change spell damage type, fast ritual casting)
-o Manifest Mind (familiar-like spectral mind)
-o One With The Word (adv. on Arcana checks, trade spellbook spells to negate damage)"
+Wizard Class Features
+o School of Conjuration
+  Conjuration 7
+  Minor conjuration
+o Spell casting
+o Ritual casting
+o Arcane Recovery"
   ];
 
   @field other: %string["Put anything you want here."];
