@@ -287,7 +287,7 @@ static char *field_to_str(field_t field) {
             result = dstrcat(result, "\n  Weight: ");
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%.1f lb", field.itemlist_val.items[i].weight / 10.0f
+              "%.1f lb", field.itemlist_val.items[i].weight
             );
             result = dstrcat(result, global_buf);
           }
@@ -306,7 +306,7 @@ static char *field_to_str(field_t field) {
       }
       if (!isnan(field.item_val.weight)) {
         result = dstrcat(result, "\nWeight: ");
-        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1f lb", ((float)field.item_val.weight)/10.0f);
+        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1f lb", field.item_val.weight);
         result = dstrcat(result, global_buf);
       }
     break;

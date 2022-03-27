@@ -105,7 +105,7 @@
 
 @section equipment:
   @field gear: %itemlist[
-    ~~ The "weight" attribute measures hectograms. So "weight:5" equals 0.5kg.
+    ~~ The "weight" attribute measures pounds. So "weight:5.5" equals 5.5 lb.
     %item[val:"dagger";qty:2;weight:4];
     %item[val:"quarterstaff";qty:1;weight:18];
     %item[val:"belt pouch";qty:1;weight:2];
