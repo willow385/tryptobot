@@ -1,0 +1,168 @@
+~~ Character sheet for LJ Heckeroth-Brown
+~~ rolled an 8, a 9, an 8, a 9, a 16, and a 16 from 3d6
+@section ability:
+  @field str: %stat[ability:9; mod:-1];
+  @field dex: %stat[ability:9; mod:-1];
+  @field con: %stat[ability:9; mod:-1];
+  @field int: %stat[ability:9; mod:-1];
+  @field wis: %stat[ability:17; mod:3];
+  @field cha: %stat[ability:18; mod:4];
+@end-section
+
+@section header-stats:
+  @field name:  %string[NULL];
+  @field class: %string["bard"];
+  @field race:  %string["Half-elf with Fae ancestry and Dark Vision 60ft"];
+  @field level: %int[15];
+  @field background: %string["Guild Artisan"];
+  @field xp: %int[NULL];
+  @field proficiency-bonus: %int[5];
+@end-section
+
+@section skills:
+  @field acrobatics: %int[0];
+  @field animal-handling: %int[2];
+  @field arcana: %int[2];
+  @field athletics: %int[0];
+  @field deception: %int[1];
+  @field history: %int[0];
+  @field insight: %int[1];
+  @field intimidation: %int[2];
+  @field investigation: %int[0];
+  @field medicine: %int[0];
+  @field nature: %int[1];
+  @field perception: %int[1];
+  @field performance: %int[2];
+  @field persuasion: %int[1];
+  @field religion: %int[0];
+  @field sleight-of-hand: %int[1];
+  @field stealth: %int[0];
+  @field survival: %int[0];
+@end-section
+
+@section saving-throws:
+  @field str: %int[0];
+  @field dex: %int[1];
+  @field con: %int[0];
+  @field int: %int[0];
+  @field wis: %int[0];
+  @field cha: %int[1];
+@end-section
+
+@section personal-stats:
+  @field ac: %int[11];
+  @field init: %int[-1]; ~~ initiative
+  @field speed: %string["30ft walking"];
+  @field hp: %int[66];
+  @field hitdice: %dice[15d8+0];
+  @field deathsaves: %deathsaves[succ:0; fail:0];
+@end-section
+
+@section proficiencies-and-languages:
+  @field armor: %string["light armor"];
+  @field weapons: %string[
+    "improvised weapons, simple weapons, hand crossbows, rapiers, shortswords, and longswords"
+  ];
+  @field tools: %string["ocarina, painter supplies, herbalism kit, and trombone"];
+  @field saving-throws: %string[NULL];
+  @field skills: %string[NULL];
+
+  @field feats: %string[
+~~ Crossbow Expert: ignores loading for crossbows in which character is proficient;
+~~ being within 5 feet of a hostile creature doesn't impose disadvantage
+"Tavern Brawler (unarmed strike uses d4),
+Crossbow Expert,
+Lucky (character has 3 Luck points replenished by long rest; spend Luck point to get advantage, or to pose disadvantage when attacked)"
+  ];
+
+  @field class-abilities: %string[
+"Jack of All Trades,
+Expertise,
+Font of Inspiration,
+Magical Secrets (+6 spells),
+College of Lore,
+Peerless Skill"
+  ];
+
+  @field languages: %string["Common, Elvish, Primordial, and Draconic"];
+@end-section
+
+@section attacks-and-spells:
+  @field attacks: %itemlist[
+    %item[val:"Countercharm";qty:NULL;weight:NULL];
+  ];
+  @field spells: %itemlist[
+    ~~ TODO fill these out
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+    %item[val:"";qty:NULL;weight:NULL];
+  ];
+  @field bonus-actions: %itemlist[
+    %item[val:"Bardic Inspiration";qty:NULL;weight:NULL];
+    %item[val:"Bonus Grapple";qty:NULL;weight:NULL];
+    %item[val:"Bonus attack crossbow when one-handed";qty:NULL;weight:NULL];
+  ];
+  @field reaction: %string["Cutting Words"];
+@end-section
+
+@section equipment:
+  @field gear: %itemlist[
+    %item[val:"Letter of Introduction from Performer's Guild";qty:1;weight:NULL];
+    %item[val:"Crossbow";qty:1;weight:23];
+    %item[val:"Backpack";qty:1;weight:23];
+    %item[val:"Bedroll";qty:1;weight:32];
+    %item[val:"Costume";qty:2;weight:18];
+    %item[val:"Candle";qty:5;weight:NULL];
+    %item[val:"One Day's Rations";qty:5;weight:9];
+    %item[val:"Waterskin";qty:1;weight:23];
+    %item[val:"Painter's Supplies";qty:1;weight:23];
+    %item[val:"Herbalism Kit";qty:1;weight:14];
+    %item[val:"Ocarina";qty:1;weight:9];
+    %item[val:"Studded Leather Armor";qty:1;weight:59];
+    %item[val:"Set of 20 Crossbow Bolts";qty:25;weight:7]; ~~ TODO store weight as a float instead of an int
+    %item[val:"Sketchbook";qty:1;weight:23];
+    %item[val:"Bag of 20 Caltrops";qty:1;weight:9];
+  ];
+  @field money: %itemlist[];
+@end-section
+
+@section etc:
+  @field alignment: %string[NULL];
+  @field personality-traits: %string[NULL];
+  @field ideals: %string[NULL];
+  @field bonds: %string[NULL];
+  @field flaws: %string[NULL];
+
+  @field features-and-traits: %string[
+    "Size: medium"
+  ];
+
+  @field other: %string[NULL];
+
+@end-section

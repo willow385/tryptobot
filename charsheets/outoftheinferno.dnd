@@ -23,24 +23,24 @@
 @end-section
 
 @section skills:
-  @field acrobatics: %int[2];
-  @field animal-handling: %int[1];
-  @field arcana: %int[10];
+  @field acrobatics: %int[0];
+  @field animal-handling: %int[0];
+  @field arcana: %int[0];
   @field athletics: %int[0];
-  @field deception: %int[-1];
-  @field history: %int[10];
-  @field insight: %int[1];
-  @field intimidation: %int[-1];
-  @field investigation: %int[10];
-  @field medicine: %int[6];
-  @field nature: %int[5];
-  @field perception: %int[1];
-  @field performance: %int[-1];
-  @field persuasion: %int[-1];
-  @field religion: %int[5];
-  @field sleight-of-hand: %int[2];
-  @field stealth: %int[2];
-  @field survival: %int[1];
+  @field deception: %int[0];
+  @field history: %int[0];
+  @field insight: %int[0];
+  @field intimidation: %int[0];
+  @field investigation: %int[0];
+  @field medicine: %int[0];
+  @field nature: %int[0];
+  @field perception: %int[0];
+  @field performance: %int[0];
+  @field persuasion: %int[0];
+  @field religion: %int[0];
+  @field sleight-of-hand: %int[0];
+  @field stealth: %int[0];
+  @field survival: %int[0];
 @end-section
 
 @section saving-throws:
@@ -105,15 +105,15 @@
 
 @section equipment:
   @field gear: %itemlist[
-    ~~ The "weight" attribute measures pounds. So "weight:5.5" equals 5 and 1/2 pounds.
+    ~~ The "weight" attribute measures hectograms. So "weight:5" equals 0.5kg.
     %item[val:"dagger";qty:2;weight:4];
     %item[val:"quarterstaff";qty:1;weight:18];
     %item[val:"belt pouch";qty:1;weight:2];
     %item[val:"set of common clothes";qty:1;weight:12];
-    %item[val:"bottle of black ink";qty:1;weight:0];
-    %item[val:"quill";qty:1;weight:0];
+    %item[val:"bottle of black ink";qty:1;weight:NULL];
+    %item[val:"quill";qty:1;weight:NULL];
     %item[val:"small knife";qty:1;weight:1];
-    %item[val:"personal papers";qty:1;weight:0];
+    %item[val:"personal papers";qty:1;weight:NULL];
   ];
 
   @field money: %itemlist[

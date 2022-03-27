@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <limits.h>
 #include "tryptobot.h"
@@ -267,7 +268,11 @@ static char *field_to_str(field_t field) {
       if (field.itemlist_val.items != NULL) {
         for (int i = 0; i < field.itemlist_val.item_count; i++) {
           if (field.itemlist_val.items[i].val != NULL) {
-            result = dstrcat(result, "\nItem: ");
+            snprintf(
+              global_buf, GLOBAL_BUF_SIZE,
+              "\nItem %d: ", i+1
+            );
+            result = dstrcat(result, global_buf);
             result = dstrcat(result, field.itemlist_val.items[i].val);
           }
           if (field.itemlist_val.items[i].qty != INT_MIN) {
@@ -278,11 +283,11 @@ static char *field_to_str(field_t field) {
             );
             result = dstrcat(result, global_buf);
           }
-          if (field.itemlist_val.items[i].weight != INT_MIN) {
+          if (!isnan(field.itemlist_val.items[i].weight)) {
             result = dstrcat(result, "\n  Weight: ");
             snprintf(
               global_buf, GLOBAL_BUF_SIZE,
-              "%.1fkg", ((float)field.itemlist_val.items[i].weight)/10.0f
+              "%.1f lb", field.itemlist_val.items[i].weight / 10.0f
             );
             result = dstrcat(result, global_buf);
           }
@@ -299,9 +304,9 @@ static char *field_to_str(field_t field) {
         snprintf(global_buf, GLOBAL_BUF_SIZE, "%d", field.item_val.qty);
         result = dstrcat(result, global_buf);
       }
-      if (field.item_val.weight != INT_MIN) {
+      if (!isnan(field.item_val.weight)) {
         result = dstrcat(result, "\nWeight: ");
-        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1fkg", ((float)field.item_val.weight)/10.0f);
+        snprintf(global_buf, GLOBAL_BUF_SIZE, "%.1f lb", ((float)field.item_val.weight)/10.0f);
         result = dstrcat(result, global_buf);
       }
     break;
