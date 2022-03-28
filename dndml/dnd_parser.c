@@ -105,8 +105,19 @@ static deathsave_t parse_deathsave_val(parser_t *, enum parser_err *);
 static item_t parse_item_val(parser_t *, enum parser_err *);
 static itemlist_t parse_itemlist_val(parser_t *, enum parser_err *);
 
-/* This function is assigned in construct_parser() to
-   the parser_t.parse() method. */
+/**
+ * This function is assigned in construct_parser() to
+ * the parser_t.parse() method.
+ * ==================================================
+ * You may think that this leaks memory in error
+ * conditions because it frees `result->sections` in
+ * those conditions, and `result->sections[n]` may
+ * hold a reference to heap-allocated memory for some
+ * value of n. DO NOT BE FOOLED! parse_section() and
+ * the other parsing functions it calls are expected
+ * to free any heap memory they allocated when such
+ * exceptional circumstances crop up.
+ */
 static charsheet_t *parser_parse(parser_t *this) {
   DEBUG1(fprintf(stderr, "~~ Inside parser_parse(%p).\n",  this));
   if (this->token_vec.tokens == NULL ||
@@ -128,6 +139,11 @@ static charsheet_t *parser_parse(parser_t *this) {
     fprintf(stderr, "~~ }\n");
   );
   while (this->token_vec.tokens[this->tok_i].type != eof) {
+    if (this->token_vec.tokens[this->tok_i].type == syntax_error) {
+      err_message(parser_syntax_error, "valid syntax");
+      free(result->sections);
+      return NULL;
+    }
     DEBUG2(
       fprintf(stderr, "~~ Inside while-loop for getting sections.\n");
       fprintf(
@@ -142,6 +158,10 @@ static charsheet_t *parser_parse(parser_t *this) {
       result->section_count * sizeof(section_t)
     );
     result->sections[result->section_count - 1] = parse_section(this, &err);
+    if (err) {
+      free(result->sections);
+      return NULL;
+    }
     DEBUG2(fprintf(stderr, "~~ Exited parse_section(%p).\n", this));
     if (result->sections[result->section_count - 1].identifier == NULL) {
       DEBUG1(
@@ -151,30 +171,25 @@ static charsheet_t *parser_parse(parser_t *this) {
           this
         );
       );
-      // free_charsheet(result); // better to leak memory than to do UB
-      result = NULL;
-      return result;
+      free(result->sections);
+      return NULL;
     }
   }
 
   if (err) {
-    free_charsheet(result);
     err_message(
       err,
       "valid syntax in file"
     );
-    result = NULL;
-    return result;
+    return NULL;
   }
   err = this->consume(this, eof);
   if (err) {
-    free_charsheet(result);
     err_message(
       err,
       "end of file"
     );
-    result = NULL;
-    return result;
+    return NULL;
   }
 
   DEBUG2(
@@ -193,10 +208,10 @@ static charsheet_t *parser_parse(parser_t *this) {
 
 // must have `parser_t *this` in scope
 #define CONSUME_ONE_CHAR(err_ptr, type, ptr_to_free_if_err, err_str) \
-  *err_ptr = this->consume(this, type);                                  \
-  if (*err_ptr) {                                                        \
-    err_message(*err_ptr, err_str);        \
-    free(ptr_to_free_if_err);                                    \
+  *err_ptr = this->consume(this, type); \
+  if (*err_ptr) { \
+    err_message(*err_ptr, err_str); \
+    free(ptr_to_free_if_err); \
   }
 
 /* The field `.identifier` of this function's return value
@@ -241,7 +256,6 @@ static section_t parse_section(parser_t *this, enum parser_err *err) {
   CONSUME_ONE_CHAR(err, colon, result.identifier, "':'");
 
   while (this->token_vec.tokens[this->tok_i].type != end_section) {
-    // if (*err) break;
     if (this->token_vec.tokens[this->tok_i].type == eof) {
       *err = parser_syntax_error;
       err_message(*err, "@end-section");
@@ -262,6 +276,7 @@ static section_t parse_section(parser_t *this, enum parser_err *err) {
       *err = parser_syntax_error;
       err_message(*err, "@field");
       free(result.fields);
+      result.fields = NULL;
       free(result.identifier);
       result.identifier = NULL;
       return result;
@@ -459,8 +474,8 @@ static field_t parse_field(parser_t *this, enum parser_err *err) {
   } else if (this->token_vec.tokens[this->tok_i].type == null_val) { \
     this->consume(this, null_val);                                   \
   } else {                                                           \
-    *err = parser_syntax_error;\
-    err_message(*err, "integer or NULL");             \
+    *err = parser_syntax_error;                                      \
+    err_message(*err, "integer or NULL");                            \
     return result;                                                   \
   }
 
@@ -761,7 +776,6 @@ static item_t parse_item_val(parser_t *this, enum parser_err *err) {
   CONSUME_RESERVED_IDENTIFIER(err, buf, "qty");
   if (*err) {
     err_message(*err, "\"qty\"");
-    free(result.val);
     result.val = NULL;
     return result;
   }
@@ -775,7 +789,6 @@ static item_t parse_item_val(parser_t *this, enum parser_err *err) {
   CONSUME_RESERVED_IDENTIFIER(err, buf, "weight");
   if (*err) {
     err_message(*err, "\"weight\"");
-    free(result.val);
     result.val = NULL;
     DEBUG2(fprintf(stderr,
       "~~ Returning from parse_item_val(%p).\n", this));
@@ -854,7 +867,7 @@ static itemlist_t parse_itemlist_val(parser_t *this, enum parser_err *err) {
   }
 
   if (*err) {
-    free(result.items);
+    result.items = NULL;
     result.item_count = 0;
     return result;
   }

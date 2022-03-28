@@ -130,7 +130,7 @@
     %item[val:"Quarterstaff";qty:1;weight:4.0];
     %item[val:"Belt Pouch";qty:1;weight:1.0];
     %item[val:"Robe of Scintillating Colors";qty:1;weight:6.0];
-    %item[val:"Sling"]
+    %item[val:"Sling";qty:1;weight:NULL];
     %item[
       val: "Bag of Holding (`%dnd query outoftheinferno equipment bag-of-holding` to see contents)";
       qty:1;
