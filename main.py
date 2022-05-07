@@ -58,6 +58,8 @@ async def on_message(message):
           "Il est interdit d'envoyer des messages "
           "en anglais sur le canal #langues-étrangères."
         )
+    if message.content.lower() == "gm":
+      await message.channel.send(f"Good morning, {message.author.mention}!")
     if len(message.content) > 0 and message.content[0] == '%':
       if message.content[1:6] == "bonk ":
         horny_user = message.content[6:]
