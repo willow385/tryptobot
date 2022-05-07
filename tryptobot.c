@@ -223,8 +223,8 @@ static void save_diceroll(diceroll_t diceroll) {
   }
 }
 
-static int random_int(int min, int max){
-  return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+static int random_int(int min, int max) {
+  return rand() % (max - min + 1) + min;
 }
 
 static diceroll_t roll_dice(int dice_ct, int faces, int modifier) {
