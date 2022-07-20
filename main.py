@@ -5,6 +5,7 @@ import ctypes
 import rebuilder
 from keep_alive import keep_alive
 
+
 rebuilder.exec("gcc -fPIC -c dstrcat.c -o dstrcat.o -DDEBUG_LVL=0")
 rebuilder.exec("gcc -fPIC -c copy_file.c -o copy_file.o")
 rebuilder.exec("gcc -fPIC -c charsheet_utils.c -o charsheet_utils.o")
