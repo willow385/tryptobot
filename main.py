@@ -76,4 +76,7 @@ async def on_message(message):
 
 keep_alive()
 token = os.environ.get("DISCORD_BOT_SECRET")
-client.run(token)
+try:
+  client.run(token)
+except:
+  os.system("kill 1") # restart the server
